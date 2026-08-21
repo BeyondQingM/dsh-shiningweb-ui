@@ -89,6 +89,7 @@
     "bundle": "tsdown",
     "watch": "tsdown --watch",
     "test": "vitest run",
+    "install:profile": "node scripts/install.mjs",
     "verify": "npm run typecheck && npm run build && npm run test"
   }
 }
