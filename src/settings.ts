@@ -1,0 +1,53 @@
+/**
+ * dsh-shiningweb-ui 设置命名空间与 schema（host/client 共享单一事实源）。
+ * settings schema 用 @deepseek-ai/schemastery 的 `z`（不是 zod）。
+ */
+import s from '@deepseek-ai/schemastery'
+
+/** Host settings 命名空间。 */
+export const SETTINGS_NAMESPACE = 'shining'
+
+export type ThemeColor = 'galaxy-blue' | 'dawn-gold' | 'aurora-purple'
+export type GitAutoRefresh = 'off' | '10s' | '30s' | '1m'
+
+/** 设置文档的可持久化形态。 */
+export interface ShiningSettings {
+  enabled: boolean
+  chat: { enabled: boolean; personaId: string; model: string; apiBase: string; apiKey: string }
+  fileExplorer: { enabled: boolean; showHidden: boolean }
+  git: { enabled: boolean; autoRefresh: GitAutoRefresh }
+  visual: { themeColor: ThemeColor; glassBlur: number }
+}
+
+/** 设置 schema：wire 校验与默认值。 */
+export const ShiningSettingsSchema = s.object({
+  enabled: s.boolean().default(true),
+  chat: s.object({
+    enabled: s.boolean().default(true),
+    personaId: s.string().default(''),
+    model: s.string().default('deepseek-chat'),
+    apiBase: s.string().default('https://api.deepseek.com'),
+    apiKey: s.string().default(''),
+  }).default({ enabled: true, personaId: '', model: 'deepseek-chat', apiBase: 'https://api.deepseek.com', apiKey: '' }),
+  fileExplorer: s.object({
+    enabled: s.boolean().default(true),
+    showHidden: s.boolean().default(false),
+  }).default({ enabled: true, showHidden: false }),
+  git: s.object({
+    enabled: s.boolean().default(true),
+    autoRefresh: s.union([s.const('off'), s.const('10s'), s.const('30s'), s.const('1m')]).default('off'),
+  }).default({ enabled: true, autoRefresh: 'off' }),
+  visual: s.object({
+    themeColor: s.union([s.const('galaxy-blue'), s.const('dawn-gold'), s.const('aurora-purple')]).default('galaxy-blue'),
+    glassBlur: s.number().min(0).max(24).default(12),
+  }).default({ themeColor: 'galaxy-blue', glassBlur: 12 }),
+})
+
+/** schema 校验通过的默认值。 */
+export const DEFAULT_SHINING_SETTINGS: ShiningSettings = {
+  enabled: true,
+  chat: { enabled: true, personaId: '', model: 'deepseek-chat', apiBase: 'https://api.deepseek.com', apiKey: '' },
+  fileExplorer: { enabled: true, showHidden: false },
+  git: { enabled: true, autoRefresh: 'off' },
+  visual: { themeColor: 'galaxy-blue', glassBlur: 12 },
+}

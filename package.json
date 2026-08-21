@@ -65,6 +65,6 @@
     "bundle": "tsdown",
     "watch": "tsdown --watch",
     "test": "vitest run",
-    "verify": "pnpm typecheck && pnpm build && pnpm test"
+    "verify": "npm run typecheck && npm run build && npm run test"
   }
 }

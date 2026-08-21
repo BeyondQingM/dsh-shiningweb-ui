@@ -1,7 +1,14 @@
 /**
  * dsh-shiningweb-ui 插件 host 半入口。
- * ShiningService 网关与 settings 命名空间注册由后续任务充实（见 gateway.ts / settings.ts）。
+ * 注册 `shining` settings 命名空间；ShiningService 网关见 gateway.ts（Task 3）。
  */
+import type { Context } from '@deepseek-ai/cordis'
+import { settingsNamespace } from '@deepseek-ai/dsh-settings'
+import { SETTINGS_NAMESPACE, ShiningSettingsSchema } from './settings.ts'
 
-/** Host plugin body —— v0.1 占位；后续任务在此注册 ShiningService 与 settings。 */
-export function apply(): void {}
+/** Host plugin body：注册 settings 命名空间。 */
+export function apply(ctx: Context): void {
+  ctx.inject(['settings'], (settingsCtx) => {
+    settingsCtx.settings.register(settingsNamespace(SETTINGS_NAMESPACE), ShiningSettingsSchema)
+  })
+}
