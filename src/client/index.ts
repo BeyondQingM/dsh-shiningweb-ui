@@ -16,8 +16,11 @@ import { bindSettingsScope } from './settings.ts'
 import { applyVisual } from './visual.ts'
 import TYPERT_REMOTE from './remote.ts'
 import { setShiningRemote } from './remote-types.ts'
+import { setWorkspaceRoot, setOpenPath } from './workspace.ts'
 import { ChatEntry, FilesEntry } from './components/SidebarEntry.tsx'
 import { ChatWindow } from './components/ChatWindow.tsx'
+import { FileExplorer } from './components/FileExplorer.tsx'
+import { GitManager } from './components/GitManager.tsx'
 
 /** Required services。不注入 'remote.shining'（我们自己在 apply 里挂载，声明为依赖会死锁）。 */
 export const inject = ['slots', 'remote', 'locale', 'settingsScope', 'connection']
@@ -36,10 +39,22 @@ export async function apply(ctx: ClientContext): Promise<void> {
   ctx.effect(() => scope.subscribe(() => applyVisual(scope.getSnapshot().value)), 'shining: visual subscription')
   applyVisual(scope.getSnapshot().value)
 
+  // 工作区根路径与打开文件回调（v0.1 单工作区假设，订阅 workspaces 列表）。
+  const syncRoot = () => setWorkspaceRoot(ctx.workspaces.list.getSnapshot().items[0]?.path ?? '')
+  syncRoot()
+  ctx.effect(() => ctx.workspaces.list.subscribe(syncRoot), 'shining: workspace root')
+  setOpenPath((path) => void ctx.workspaces.openPath(path))
+
   // 侧边栏脚部入口：天圆地方 / 文件。
   ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({ name: 'sidebar.footer.action', id: 'shining-chat', order: 30, locale: NS }, ChatEntry))
   ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({ name: 'sidebar.footer.action', id: 'shining-files', order: 31, locale: NS }, FilesEntry))
 
   // 天圆地方聊天窗（shell.overlay）。
   ctx.slots.inject('shell.overlay', () => ctx.slots.register({ name: 'shell.overlay', id: 'shining-chat' }, ChatWindow))
+
+  // 文件栏抽屉（shell.overlay）。
+  ctx.slots.inject('shell.overlay', () => ctx.slots.register({ name: 'shell.overlay', id: 'shining-files' }, FileExplorer))
+
+  // Git 工具栏（conversation.input.dock）。
+  ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'shining-git' }, GitManager))
 }
