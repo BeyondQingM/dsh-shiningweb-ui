@@ -1,4 +1,4 @@
-﻿/**
+/**
  * dsh-shiningweb-ui 插件 client 半入口。
  * apply：注册字典、挂载 shinining Remote、绑定 settingsScope、应用视觉。
  */
@@ -8,12 +8,14 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
+import type {} from './slots.ts'
 import type { ShiningSettings } from '../settings.ts'
 import { SETTINGS_NAMESPACE } from '../settings.ts'
 import { dict, NS } from './locales.ts'
 import { bindSettingsScope } from './settings.ts'
 import { applyVisual } from './visual.ts'
 import TYPERT_REMOTE from './remote.ts'
+import { ChatEntry, FilesEntry } from './components/SidebarEntry.tsx'
 
 /** Required services。不注入 'remote.shining'（我们自己在 apply 里挂载，声明为依赖会死锁）。 */
 export const inject = ['slots', 'remote', 'locale', 'settingsScope', 'connection']
@@ -31,5 +33,7 @@ export async function apply(ctx: ClientContext): Promise<void> {
   ctx.effect(() => scope.subscribe(() => applyVisual(scope.getSnapshot().value)), 'shining: visual subscription')
   applyVisual(scope.getSnapshot().value)
 
-  // 槽位注册由后续任务（侧边栏入口 / shell.overlay / input.dock / settings.section）逐步加入。
+  // 侧边栏脚部入口：天圆地方 / 文件。
+  ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({ name: 'sidebar.footer.action', id: 'shining-chat', order: 30, locale: NS }, ChatEntry))
+  ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({ name: 'sidebar.footer.action', id: 'shining-files', order: 31, locale: NS }, FilesEntry))
 }
