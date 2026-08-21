@@ -1,0 +1,5 @@
+# dsh-shiningweb-ui bundle patch: mount the plugin host half; the browser half
+# ships via exports["./client"] discovered through package.json dsh.client.
+- insert:
+    - id: shiningweb-ui
+      name: dsh-shiningweb-ui
