@@ -4,14 +4,26 @@
  */
 import { promises as fs } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { Context, Service } from '@deepseek-ai/cordis'
 import s from '@deepseek-ai/schemastery'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type {
-  FsEntry, FsListRequest, FsListValue, FsOpValue, FsPathRequest, FsReadRequest,
-  FsReadValue, FsRenameRequest, FsWriteRequest, ShiningResult,
+  ChatRequest, ChatValue, FsEntry, FsListRequest, FsListValue, FsOpValue, FsPathRequest,
+  FsReadRequest, FsReadValue, FsRenameRequest, FsWriteRequest, GitBranchRequest,
+  GitChange, GitCreateBranchRequest, GitOpValue, GitPathRequest, GitStatusRequest,
+  GitStatusValue, ShiningResult,
 } from './types.ts'
 import { failure, resolveWithinRoot, success } from './types.ts'
+
+const execFileAsync = promisify(execFile)
+
+/** 在 repo 目录执行 git 命令。 */
+async function gitResult(repo: string, args: string[]): Promise<string> {
+  const { stdout } = await execFileAsync('git', ['-C', repo, ...args], { timeout: 30000 })
+  return stdout.trim()
+}
 
 export interface Config {}
 
@@ -113,6 +125,70 @@ export class ShiningService extends TypertRemoteService {
       return success({ path: target })
     } catch (error) {
       return failure('fs-error', error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  @Remote('gitStatus')
+  async gitStatus(request: GitStatusRequest): Promise<ShiningResult<GitStatusValue>> {
+    try {
+      const repo = resolveWithinRoot(request.root, request.repoPath)
+      const branch = await gitResult(repo, ['branch', '--show-current'])
+      const porcelain = await gitResult(repo, ['status', '--porcelain'])
+      const lines = porcelain === '' ? [] : porcelain.split('\n')
+      const changes: GitChange[] = lines.map((line) => ({
+        path: line.slice(3),
+        status: (line[0] === '?' ? 'U' : line[0]) as GitChange['status'],
+      }))
+      return success({ branch, dirtyCount: lines.length, changes })
+    } catch (error) {
+      return failure('git-error', error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  @Remote('gitCheckout')
+  async gitCheckout(request: GitBranchRequest): Promise<ShiningResult<GitOpValue>> {
+    try {
+      const repo = resolveWithinRoot(request.root, request.repoPath)
+      return success({ output: await gitResult(repo, ['checkout', request.branch]) })
+    } catch (error) {
+      return failure('git-error', error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  @Remote('gitCreateBranch')
+  async gitCreateBranch(request: GitCreateBranchRequest): Promise<ShiningResult<GitOpValue>> {
+    try {
+      const repo = resolveWithinRoot(request.root, request.repoPath)
+      return success({ output: await gitResult(repo, ['checkout', '-b', request.name]) })
+    } catch (error) {
+      return failure('git-error', error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  @Remote('gitPull')
+  async gitPull(request: GitPathRequest): Promise<ShiningResult<GitOpValue>> {
+    try {
+      const repo = resolveWithinRoot(request.root, request.repoPath)
+      return success({ output: await gitResult(repo, ['pull']) })
+    } catch (error) {
+      return failure('git-error', error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  @Remote('chat')
+  async chat(request: ChatRequest): Promise<ShiningResult<ChatValue>> {
+    try {
+      const response = await fetch(`${request.apiBase.replace(/\/$/, '')}/chat/completions`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${request.apiKey}` },
+        body: JSON.stringify({ model: request.model, messages: request.messages, stream: false }),
+        signal: AbortSignal.timeout(120000),
+      })
+      if (!response.ok) return failure('chat-error', `upstream ${response.status}`)
+      const data = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
+      return success({ content: data.choices?.[0]?.message?.content ?? '' })
+    } catch (error) {
+      return failure('chat-error', error instanceof Error ? error.message : String(error))
     }
   }
 }
