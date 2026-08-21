@@ -15,7 +15,9 @@ import { dict, NS } from './locales.ts'
 import { bindSettingsScope } from './settings.ts'
 import { applyVisual } from './visual.ts'
 import TYPERT_REMOTE from './remote.ts'
+import { setShiningRemote } from './remote-types.ts'
 import { ChatEntry, FilesEntry } from './components/SidebarEntry.tsx'
+import { ChatWindow } from './components/ChatWindow.tsx'
 
 /** Required services。不注入 'remote.shining'（我们自己在 apply 里挂载，声明为依赖会死锁）。 */
 export const inject = ['slots', 'remote', 'locale', 'settingsScope', 'connection']
@@ -26,6 +28,7 @@ export async function apply(ctx: ClientContext): Promise<void> {
 
   // 挂载本插件的 Remote 命名空间（strict zod codec）。
   await ctx.remote.$mount(TYPERT_REMOTE)
+  setShiningRemote(ctx.remote.shining)
 
   // 绑定设置命名空间，订阅并应用视觉主题。
   const scope = ctx.settingsScope.bind<ShiningSettings>({ namespace: SETTINGS_NAMESPACE })
@@ -36,4 +39,7 @@ export async function apply(ctx: ClientContext): Promise<void> {
   // 侧边栏脚部入口：天圆地方 / 文件。
   ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({ name: 'sidebar.footer.action', id: 'shining-chat', order: 30, locale: NS }, ChatEntry))
   ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({ name: 'sidebar.footer.action', id: 'shining-files', order: 31, locale: NS }, FilesEntry))
+
+  // 天圆地方聊天窗（shell.overlay）。
+  ctx.slots.inject('shell.overlay', () => ctx.slots.register({ name: 'shell.overlay', id: 'shining-chat' }, ChatWindow))
 }
