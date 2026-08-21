@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import { render } from '@testing-library/react'
 import { openChat, closeChat, openFiles, closeFiles, useShiningStore } from '../src/client/store.ts'
 import { applyVisual } from '../src/client/visual.ts'
+import { ChatEntry } from '../src/client/components/SidebarEntry.tsx'
 
 describe('shining client store', () => {
   it('opens/closes chat panel', () => {
@@ -24,5 +26,12 @@ describe('applyVisual', () => {
     applyVisual({ visual: { themeColor: 'dawn-gold', glassBlur: 8 } } as never)
     expect(document.documentElement.style.getPropertyValue('--shining-primary')).toBe('#e0a43b')
     expect(document.documentElement.style.getPropertyValue('--shining-blur')).toBe('8px')
+  })
+})
+
+describe('SidebarEntry', () => {
+  it('renders the 天圆地方 button when wide', () => {
+    const { getByRole } = render(<ChatEntry wide={true} {...({} as never)} />)
+    expect(getByRole('button')).toBeTruthy()
   })
 })

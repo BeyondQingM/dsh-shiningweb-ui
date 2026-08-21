@@ -1,7 +1,7 @@
 /** useChat：独立模型聊天（IndexedDB 历史 + remote.chat 调用）。 */
 import { useCallback, useEffect, useState } from 'react'
 import type { ShiningSettings } from '../../settings.ts'
-import type { ChatMessage, ChatRequest, ChatValue } from '../../types.ts'
+import type { ChatRequest, ChatValue } from '../../types.ts'
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol'
 import { loadChat, saveChat, type ChatRecord } from '../storage.ts'
 
@@ -20,35 +20,25 @@ export function useChat(personaId: string, remote: ChatRemote | undefined, setti
     return () => { alive = false }
   }, [personaId])
 
-  const append = useCallback(async (role: 'user' | 'assistant', content: string) => {
-    const next: ChatRecord = {
-      id: rec?.id ?? `${personaId}-${Date.now()}`,
-      personaId,
-      messages: [...(rec?.messages ?? []), { role, content }],
-      updatedAt: Date.now(),
-    }
-    await saveChat(next)
-    setRec(next)
-  }, [rec, personaId])
-
   const send = useCallback(async (text: string): Promise<void> => {
     if (busy || !text.trim() || !remote) return
     setBusy(true)
     try {
-      await append('user', text.trim())
-      const history = [...(rec?.messages ?? []), { role: 'user' as const, content: text.trim() }]
-      const res = await remote.chat({
-        messages: history,
-        model: settings.chat.model,
-        apiBase: settings.chat.apiBase,
-        apiKey: settings.chat.apiKey,
-      })
+      const base = rec?.messages ?? []
+      const userMsg = { role: 'user' as const, content: text.trim() }
+      const withUser = [...base, userMsg]
+      const nextRec: ChatRecord = { id: rec?.id ?? `${personaId}-${Date.now()}`, personaId, messages: withUser, updatedAt: Date.now() }
+      await saveChat(nextRec)
+      setRec(nextRec)
+      const res = await remote.chat({ messages: withUser, model: settings.chat.model, apiBase: settings.chat.apiBase, apiKey: settings.chat.apiKey })
       const content = res.ok ? res.value.content : (res.error?.message ?? '请求失败')
-      await append('assistant', content)
+      const finalRec: ChatRecord = { ...nextRec, messages: [...withUser, { role: 'assistant', content }], updatedAt: Date.now() }
+      await saveChat(finalRec)
+      setRec(finalRec)
     } finally {
       setBusy(false)
     }
-  }, [append, busy, rec, remote, settings.chat])
+  }, [busy, rec, remote, settings.chat, personaId])
 
   return { rec, busy, send }
 }
