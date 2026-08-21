@@ -24,11 +24,11 @@ function descriptorOf(m) {
       service: '${NAMESPACE}',
       namespace: '${NAMESPACE}',
       method: '${m.method}',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#${m.method}Request', schema: req_${m.method} } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#${m.method}Request', schema: req_${m.method} } },
       ],
-      result: { mode: 'strict', typeSymbol: '#${m.method}Result', schema: res_${m.method} },
+      result: { mode: 'strict' as const, typeSymbol: '#${m.method}Result', schema: res_${m.method} },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     }`
 }

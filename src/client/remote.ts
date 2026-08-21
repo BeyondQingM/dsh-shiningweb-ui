@@ -34,11 +34,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'fsList',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#fsListRequest', schema: req_fsList } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#fsListRequest', schema: req_fsList } },
       ],
-      result: { mode: 'strict', typeSymbol: '#fsListResult', schema: res_fsList },
+      result: { mode: 'strict' as const, typeSymbol: '#fsListResult', schema: res_fsList },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -46,11 +46,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'fsRead',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#fsReadRequest', schema: req_fsRead } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#fsReadRequest', schema: req_fsRead } },
       ],
-      result: { mode: 'strict', typeSymbol: '#fsReadResult', schema: res_fsRead },
+      result: { mode: 'strict' as const, typeSymbol: '#fsReadResult', schema: res_fsRead },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -58,11 +58,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'fsWrite',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#fsWriteRequest', schema: req_fsWrite } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#fsWriteRequest', schema: req_fsWrite } },
       ],
-      result: { mode: 'strict', typeSymbol: '#fsWriteResult', schema: res_fsWrite },
+      result: { mode: 'strict' as const, typeSymbol: '#fsWriteResult', schema: res_fsWrite },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -70,11 +70,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'fsCreateFile',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#fsCreateFileRequest', schema: req_fsCreateFile } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#fsCreateFileRequest', schema: req_fsCreateFile } },
       ],
-      result: { mode: 'strict', typeSymbol: '#fsCreateFileResult', schema: res_fsCreateFile },
+      result: { mode: 'strict' as const, typeSymbol: '#fsCreateFileResult', schema: res_fsCreateFile },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -82,11 +82,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'fsCreateDir',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#fsCreateDirRequest', schema: req_fsCreateDir } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#fsCreateDirRequest', schema: req_fsCreateDir } },
       ],
-      result: { mode: 'strict', typeSymbol: '#fsCreateDirResult', schema: res_fsCreateDir },
+      result: { mode: 'strict' as const, typeSymbol: '#fsCreateDirResult', schema: res_fsCreateDir },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -94,11 +94,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'fsRename',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#fsRenameRequest', schema: req_fsRename } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#fsRenameRequest', schema: req_fsRename } },
       ],
-      result: { mode: 'strict', typeSymbol: '#fsRenameResult', schema: res_fsRename },
+      result: { mode: 'strict' as const, typeSymbol: '#fsRenameResult', schema: res_fsRename },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -106,11 +106,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'fsDelete',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#fsDeleteRequest', schema: req_fsDelete } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#fsDeleteRequest', schema: req_fsDelete } },
       ],
-      result: { mode: 'strict', typeSymbol: '#fsDeleteResult', schema: res_fsDelete },
+      result: { mode: 'strict' as const, typeSymbol: '#fsDeleteResult', schema: res_fsDelete },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -118,11 +118,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'gitStatus',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#gitStatusRequest', schema: req_gitStatus } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#gitStatusRequest', schema: req_gitStatus } },
       ],
-      result: { mode: 'strict', typeSymbol: '#gitStatusResult', schema: res_gitStatus },
+      result: { mode: 'strict' as const, typeSymbol: '#gitStatusResult', schema: res_gitStatus },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -130,11 +130,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'gitCheckout',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#gitCheckoutRequest', schema: req_gitCheckout } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#gitCheckoutRequest', schema: req_gitCheckout } },
       ],
-      result: { mode: 'strict', typeSymbol: '#gitCheckoutResult', schema: res_gitCheckout },
+      result: { mode: 'strict' as const, typeSymbol: '#gitCheckoutResult', schema: res_gitCheckout },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -142,11 +142,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'gitCreateBranch',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#gitCreateBranchRequest', schema: req_gitCreateBranch } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#gitCreateBranchRequest', schema: req_gitCreateBranch } },
       ],
-      result: { mode: 'strict', typeSymbol: '#gitCreateBranchResult', schema: res_gitCreateBranch },
+      result: { mode: 'strict' as const, typeSymbol: '#gitCreateBranchResult', schema: res_gitCreateBranch },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -154,11 +154,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'gitPull',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#gitPullRequest', schema: req_gitPull } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#gitPullRequest', schema: req_gitPull } },
       ],
-      result: { mode: 'strict', typeSymbol: '#gitPullResult', schema: res_gitPull },
+      result: { mode: 'strict' as const, typeSymbol: '#gitPullResult', schema: res_gitPull },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     },
     {
@@ -166,11 +166,11 @@ export const TYPERT_REMOTE = {
       service: 'shining',
       namespace: 'shining',
       method: 'chat',
-      invocation: { kind: 'direct' },
+      invocation: { kind: 'direct' as const },
       parameters: [
-        { name: 'request', wire: 'request', source: 'json', codec: { mode: 'strict', typeSymbol: '#chatRequest', schema: req_chat } },
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#chatRequest', schema: req_chat } },
       ],
-      result: { mode: 'strict', typeSymbol: '#chatResult', schema: res_chat },
+      result: { mode: 'strict' as const, typeSymbol: '#chatResult', schema: res_chat },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     }
   ],
