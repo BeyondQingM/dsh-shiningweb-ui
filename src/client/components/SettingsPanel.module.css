@@ -1,0 +1,7 @@
+.group { display: flex; flex-direction: column; gap: 16px; padding: 16px 0; }
+.title { margin: 0 0 4px; font-size: 18px; }
+.section { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; border-bottom: 1px solid var(--dsw-alias-border-l2); }
+.sub { margin: 0 0 4px; font-size: 14px; }
+.row { display: flex; align-items: center; gap: 8px; margin: 4px 0; color: var(--dsw-alias-label-primary); }
+.label { min-width: 90px; }
+.link { align-self: flex-start; background: transparent; border: 0; cursor: pointer; color: var(--dsw-alias-state-warn-primary); font: inherit; }

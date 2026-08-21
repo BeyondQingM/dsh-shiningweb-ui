@@ -24,3 +24,13 @@ export function useSettings(): ShiningSettings {
     snapshot,
   )
 }
+
+/** 写入一个设置字段（经绑定 scope）。 */
+export async function writeSetting(field: string, value: unknown): Promise<void> {
+  await scope?.set(field, value)
+}
+
+/** 清除一个设置字段（回退到组合默认）。 */
+export async function clearSetting(field: string): Promise<void> {
+  await scope?.unset(field)
+}

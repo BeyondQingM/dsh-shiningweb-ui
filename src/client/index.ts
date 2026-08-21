@@ -21,6 +21,7 @@ import { ChatEntry, FilesEntry } from './components/SidebarEntry.tsx'
 import { ChatWindow } from './components/ChatWindow.tsx'
 import { FileExplorer } from './components/FileExplorer.tsx'
 import { GitManager } from './components/GitManager.tsx'
+import { SettingsPanel } from './components/SettingsPanel.tsx'
 
 /** Required services。不注入 'remote.shining'（我们自己在 apply 里挂载，声明为依赖会死锁）。 */
 export const inject = ['slots', 'remote', 'locale', 'settingsScope', 'connection']
@@ -57,4 +58,7 @@ export async function apply(ctx: ClientContext): Promise<void> {
 
   // Git 工具栏（conversation.input.dock）。
   ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'shining-git' }, GitManager))
+
+  // 设置页（settings.section）。
+  ctx.slots.inject('settings.section', () => ctx.slots.register({ name: 'settings.section', id: 'shining', order: 20, locale: NS }, SettingsPanel))
 }
