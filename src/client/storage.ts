@@ -74,3 +74,37 @@ function readDataUrl(file: File): Promise<string> {
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = () => rej(new Error('image load failed')); img.src = src })
 }
+
+// ── 天圆地方自持记忆（IndexedDB） ──
+const MEM_DB = 'shining-memory'
+const MEM_STORE = 'memory'
+
+function openMemDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(MEM_DB, 1)
+    req.onupgradeneeded = () => { req.result.createObjectStore(MEM_STORE, { keyPath: 'id' }) }
+    req.onsuccess = () => resolve(req.result)
+    req.onerror = () => reject(req.error)
+  })
+}
+
+export interface MemoryNote { id: string; content: string; createdAt: number }
+
+/** 记录一条天圆地方记忆（自持 IndexedDB 写）。 */
+export async function saveMemoryNote(content: string): Promise<void> {
+  const db = await openMemDb()
+  const rec: MemoryNote = { id: `mem-${Date.now()}`, content, createdAt: Date.now() }
+  const tx = db.transaction(MEM_STORE, 'readwrite')
+  tx.objectStore(MEM_STORE).put(rec)
+  await new Promise<void>((res, rej) => { tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error) })
+}
+
+/** 读取天圆地方自持记忆（倒序，最多 limit 条）。 */
+export async function listMemoryNotes(limit = 10): Promise<MemoryNote[]> {
+  const db = await openMemDb()
+  return new Promise((res, rej) => {
+    const rq = db.transaction(MEM_STORE).objectStore(MEM_STORE).getAll()
+    rq.onsuccess = () => res((rq.result as MemoryNote[]).sort((a, b) => b.createdAt - a.createdAt).slice(0, limit))
+    rq.onerror = () => rej(rq.error)
+  })
+}

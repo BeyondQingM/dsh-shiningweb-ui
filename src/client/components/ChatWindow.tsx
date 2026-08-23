@@ -6,6 +6,7 @@ import { useSettings } from '../settings.ts'
 import { useShiningStore, closeChat } from '../store.ts'
 import { useChat } from '../hooks/useChat.ts'
 import { useDshContext, dshContextToText, sendToSession, getCurrentSessionId } from '../dsh-context.ts'
+import { readMemoryContext } from '../memory.ts'
 import { getShiningRemote } from '../remote-types.ts'
 import { getImage, setImage, clearImage, compressImage } from '../storage.ts'
 import { dict } from '../locales.ts'
@@ -35,7 +36,11 @@ export function ChatWindow(_props: Props): React.ReactNode {
   }
   const backgroundImage = getImage()
 
-  const doSend = () => void send(input, contextText)
+  const doSend = async () => {
+    const mem = await readMemoryContext(input)
+    const combined = [contextText, mem].filter(Boolean).join('\n')
+    await send(input, combined)
+  }
   const doDelegate = () => {
     const cur = getCurrentSessionId()
     if (!cur || !input.trim()) return
