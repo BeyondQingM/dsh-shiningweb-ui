@@ -16,6 +16,7 @@ import { bindSettingsScope } from './settings.ts'
 import { applyVisual } from './visual.ts'
 import TYPERT_REMOTE from './remote.ts'
 import { setShiningRemote } from './remote-types.ts'
+import { bindDshCtx } from './dsh-context.ts'
 import { setWorkspaceRoot, setOpenPath } from './workspace.ts'
 import { ChatEntry, FilesEntry } from './components/SidebarEntry.tsx'
 import { ChatWindow } from './components/ChatWindow.tsx'
@@ -33,6 +34,9 @@ export async function apply(ctx: ClientContext): Promise<void> {
   // 挂载本插件的 Remote 命名空间（strict zod codec）。
   await ctx.remote.$mount(TYPERT_REMOTE)
   setShiningRemote(ctx.remote.shining)
+
+  // 绑定 DSH 客户端上下文（天圆地方感知主窗口项目/会话 + 代发）。
+  bindDshCtx(ctx)
 
   // 绑定设置命名空间，订阅并应用视觉主题。
   const scope = ctx.settingsScope.bind<ShiningSettings>({ namespace: SETTINGS_NAMESPACE })
