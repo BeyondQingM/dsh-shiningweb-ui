@@ -23,13 +23,16 @@
 **安装到 profile**
 
 ```sh
-# 使用本地路径（插件源码目录）
+# 从 GitHub 安装（推荐，仓库已包含构建产物 lib/）
+dsh plugin --profile web add "github:BeyondQingM/dsh-shiningweb-ui"
+
+# 或使用本地路径（插件源码目录）
 dsh plugin --profile web add "file:/path/to/dsh-shiningweb-ui"
 ```
 
 安装完成后，**重启 `dsh web`** 使插件生效（重启会中断当前会话）。
 
-> 若从源码目录安装，需先执行构建：`npm install && npm run build`，生成 `lib/` 产物后再安装。
+> 仓库已预构建 `lib/` 产物，安装即用、无需本地构建。若从源码目录安装并自行修改了源码，需先执行构建：`npm install && npm run build` 重新生成 `lib/`。
 
 ## 🎨 使用说明
 
