@@ -15,7 +15,7 @@ import { dict, NS } from './locales.ts'
 import { bindSettingsScope } from './settings.ts'
 import { applyVisual } from './visual.ts'
 import TYPERT_REMOTE from './remote.ts'
-import { setShiningRemote } from './remote-types.ts'
+import { setShiningRemote, type ShiningRemote } from './remote-types.ts'
 import { bindDshCtx } from './dsh-context.ts'
 import { setWorkspaceRoot, setOpenPath } from './workspace.ts'
 import { ChatEntry, FilesEntry } from './components/SidebarEntry.tsx'
@@ -32,8 +32,10 @@ export async function apply(ctx: ClientContext): Promise<void> {
   ctx.effect(() => ctx.locale.register(NS, dict), 'shining: dictionaries')
 
   // 挂载本插件的 Remote 命名空间（strict zod codec）。
+  // 注意：不能用 ctx.remote.shining（服务属性访问会强制 inject，但我们自己 mount，无法预先 inject）；
+  // 改用 ctx.get('remote.shining')（可选服务读取，不走 inject 检查）。
   await ctx.remote.$mount(TYPERT_REMOTE)
-  setShiningRemote(ctx.remote.shining)
+  setShiningRemote(ctx.get('remote.shining') as ShiningRemote | undefined)
 
   // 绑定 DSH 客户端上下文（天圆地方感知主窗口项目/会话 + 代发）。
   bindDshCtx(ctx)
