@@ -1,52 +1,65 @@
 # dsh-shiningweb-ui（璀璨星河）
 
-DSH 插件：独立聊天空间（天圆地方）、类 VS Code 文件栏、Git 分支快速管理、视觉增强基础。所有模块可在设置面板独立开关。
+一个为 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 打造的 UI 增强插件：独立的 AI 人格空间「天圆地方」、类 VS Code 文件栏、Git 分支管理、QQ 群接入、记忆与朋友圈、以及可自定义的视觉主题。所有模块可在设置面板独立开关。
 
-- Host 半：`ShiningService`（Typert Remote 命名空间 `shining`）+ `shining` settings 命名空间。
-- Client 半：5 处槽位注册（`sidebar.footer.action` 入口 ×2、`shell.overlay` 聊天窗/文件抽屉、`conversation.input.dock` Git 工具栏、`settings.section` 设置页）。
+## ✨ 功能特性
 
-## 前置条件
+| 模块 | 说明 |
+|------|------|
+| **天圆地方** | 独立 AI 聊天空间：独立的模型与人格配置、立绘背景、记忆、朋友圈 |
+| **分级能力模式** | 萌宠 / 助理 / 超级助理，渐进式权限；超级助理可代发任务给 DSH 会话并接入 QQ |
+| **QQ 群接入** | 让「天圆地方」作为 QQ 机器人接入群聊/私聊，回复使用天圆地方独立人格 |
+| **文件栏** | 侧边栏文件树：展开/折叠、右键菜单、搜索过滤、用系统应用打开文件 |
+| **Git 分支管理** | 对话框下方的工具栏：切换/创建分支、拉取更新、未提交文件数 |
+| **视觉增强** | 主题色（星河蓝/晨曦金/极光紫）、毛玻璃强度、自定义背景 |
 
-- Node ≥ 22、`git` 在 PATH、npm。
-- 已运行 `dsh web`（profile `web`）。
+## 📦 安装
 
-## 构建
+**前置条件**
 
-```sh
-npm install
-npm run build
-```
+- 已安装 DeepSeek Harness（`dsh`），使用 `web` profile。
+- Node.js ≥ 22，`git` 在系统 PATH。
 
-产物：`lib/index.js`（host 半）、`lib/client.js`（client bundle，`window.__ModuleLoader__.load` 格式）、`lib/typert.host.js`（host `./typert` 制品）、`src/client/remote.ts`（client remote 贡献，由 `scripts/gen-typert.mjs` 生成）。
-
-## 安装（本地开发，重启生效）
-
-```sh
-node scripts/install.mjs web
-# 或 dsh plugin --profile web add "file:<本目录>"
-```
-
-安装后**重启 dsh web**（会中断当前会话）。`dsh plugin add` 为 profile 目录的 pnpm 转发层，自动对账 `dsh.profile.bundles`。
-
-## 验证
+**安装到 profile**
 
 ```sh
-npm run verify
+# 使用本地路径（插件源码目录）
+dsh plugin --profile web add "file:/path/to/dsh-shiningweb-ui"
 ```
 
-GUI 验证清单（重启后）：
-1. 设置页出现「璀璨星河」分组（settings.section）。
-2. 侧边栏脚部出现「天圆地方」「文件」两个按钮（sidebar.footer.action）。
-3. 点击「天圆地方」弹出全屏聊天窗（立绘背景、消息收发、独立模型配置）。
-4. 点击「文件」弹出左侧文件树抽屉（展开/右键菜单/搜索/打开文件）。
-5. 会话输入框上方出现 Git 工具栏（分支下拉/切换/创建/pull/未提交计数）。
-6. 设置面板逐模块关闭开关，界面相应部分隐藏。
-7. 切换主题色/毛玻璃强度，界面颜色与模糊变化。
+安装完成后，**重启 `dsh web`** 使插件生效（重启会中断当前会话）。
 
-## v0.1 边界（后续增强点）
+> 若从源码目录安装，需先执行构建：`npm install && npm run build`，生成 `lib/` 产物后再安装。
 
-- chat 为 unary 非流式；后续可加 SSE 流式。
-- 打开文件用系统默认应用（host `openPath`）；不做内嵌编辑器。
-- 无文件拖拽、Git 冲突/远程分支 UI。
-- `apiKey` 存 settings 文档（后续迁 credentials 库）。
-- 侧边栏顶部入口待 DSH 开放 section 槽位（v0.1 用脚部）。
+## 🎨 使用说明
+
+安装重启后：
+
+1. **天圆地方聊天窗**：点击侧边栏脚部的「天圆地方」按钮打开。可上传立绘、配置独立模型、切换模式。
+2. **文件栏**：点击侧边栏脚部的「文件」按钮，左侧滑出文件树抽屉。右键文件/文件夹可新建、重命名、删除、复制路径；展开目录为懒加载。
+3. **Git 工具栏**：位于会话输入框上方，显示当前分支与未提交文件数，支持下拉切换、创建分支、拉取。
+4. **朋友圈 / QQ 会话**：在天圆地方聊天窗顶部的标签页切换；「QQ 会话」在超级助理模式下可见。
+
+## ⚙️ 设置
+
+在 DSH 设置面板 → 「璀璨星河」分组中集中管理：
+
+- **启用**：总开关。
+- **能力模式**：萌宠 / 助理 / 超级助理。
+- **天圆地方**：独立模型的 Base URL、API Key、模型名、立绘上传。
+- **文件栏**：显示隐藏文件。
+- **Git 分支管理**：自动刷新间隔。
+- **视觉主题**：主色调、毛玻璃强度。
+- **QQ 群接入**（仅超级助理模式可见）：启用、AppID、AppSecret、群号白名单、QQ 人格提示词。
+
+> 独立模型的 API Key 保存在本机 DSH 设置文档中；QQ 凭据同理。请妥善保管。
+
+## ⚠️ 注意事项
+
+- **QQ 接入**需在「超级助理」模式下配置 AppID/AppSecret，并安装天圆地方记忆依赖的 [@modusensus/dsh-mneme](https://github.com/modusensus/dsh-mneme) 插件（用于记忆检索，可选）。
+- **记忆**的读侧依赖 dsh-mneme；若未安装，天圆地方仅使用自身记录的记忆。
+- 部分能力（如 QQ 富媒体消息、内嵌编辑器）仍在增强中，详见仓库文档。
+
+## 📄 许可证
+
+本项目基于 MIT 许可证开源。第三方开源项目的代码/版权声明见 [ATTRIBUTION.md](ATTRIBUTION.md)。
