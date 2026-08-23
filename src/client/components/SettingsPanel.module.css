@@ -5,3 +5,4 @@
 .row { display: flex; align-items: center; gap: 8px; margin: 4px 0; color: var(--dsw-alias-label-primary); }
 .label { min-width: 90px; }
 .link { align-self: flex-start; background: transparent; border: 0; cursor: pointer; color: var(--dsw-alias-state-warn-primary); font: inherit; }
+.longTextarea { flex: 1; min-height: 72px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); resize: vertical; }

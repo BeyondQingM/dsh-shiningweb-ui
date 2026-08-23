@@ -7,6 +7,7 @@ import type {
   ChatRequest, ChatValue, FsListRequest, FsListValue, FsPathRequest, FsOpValue,
   FsReadRequest, FsReadValue, FsRenameRequest, FsWriteRequest, GitBranchRequest,
   GitCreateBranchRequest, GitOpValue, GitPathRequest, GitStatusRequest, GitStatusValue,
+  QqListRequest, QqListValue, QqReadRequest, QqReadValue, QqSendRequest, QqSendValue,
 } from '../types.ts'
 
 /** ctx.remote.shining 命名空间方法面。 */
@@ -23,6 +24,9 @@ export interface ShiningRemote {
   gitCreateBranch: (request: GitCreateBranchRequest) => Promise<RemoteResult<GitOpValue>>
   gitPull: (request: GitPathRequest) => Promise<RemoteResult<GitOpValue>>
   chat: (request: ChatRequest) => Promise<RemoteResult<ChatValue>>
+  qqList: (request: QqListRequest) => Promise<RemoteResult<QqListValue>>
+  qqRead: (request: QqReadRequest) => Promise<RemoteResult<QqReadValue>>
+  qqSend: (request: QqSendRequest) => Promise<RemoteResult<QqSendValue>>
 }
 
 declare module '@deepseek-ai/dsh-typert-protocol' {

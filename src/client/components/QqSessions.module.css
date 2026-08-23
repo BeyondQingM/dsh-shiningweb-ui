@@ -1,0 +1,14 @@
+.wrap { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.refresh { align-self: flex-start; padding: 4px 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 6px; background: transparent; cursor: pointer; color: var(--dsw-alias-label-primary); font: inherit; }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.session { display: flex; gap: 8px; width: 100%; padding: 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: var(--dsw-alias-bg-module-platform); cursor: pointer; color: var(--dsw-alias-label-primary); font: inherit; text-align: left; }
+.peer { flex: none; font-weight: 600; }
+.preview { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dsw-alias-label-secondary); }
+.detail { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 12px; }
+.messages { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 40vh; overflow-y: auto; }
+.user { align-self: flex-end; background: var(--shining-primary); color: #fff; padding: 5px 10px; border-radius: 10px; max-width: 75%; }
+.assistant { align-self: flex-start; background: var(--dsw-alias-bg-base); padding: 5px 10px; border-radius: 10px; max-width: 75%; }
+.composer { display: flex; gap: 8px; }
+.input { flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); }
+.send { padding: 6px 14px; border: 0; border-radius: 6px; background: var(--shining-primary); color: #fff; cursor: pointer; }
+.empty { color: var(--dsw-alias-label-secondary); font-size: 13px; }

@@ -24,6 +24,18 @@ export function SettingsPanel(_props: Props): React.ReactNode {
       <Toggle label="启用璀璨星河" checked={settings.enabled} onChange={(v) => void patch('enabled', v)} />
 
       <section className={styles.section}>
+        <h4 className={styles.sub}>能力模式</h4>
+        <label className={styles.row}>
+          <span>模式</span>
+          <select value={settings.capabilityMode} onChange={(e) => void patch('capabilityMode', e.target.value as ShiningSettings['capabilityMode'])}>
+            <option value="pet">萌宠（仅聊天+记忆+立绘）</option>
+            <option value="assistant">助理（可读主对话+代发需确认）</option>
+            <option value="super">超级助理（可调 Agent+QQ 接入）</option>
+          </select>
+        </label>
+      </section>
+
+      <section className={styles.section}>
         <Toggle label="天圆地方" checked={settings.chat.enabled} onChange={(v) => void patch('chat', { ...settings.chat, enabled: v })} />
         <Row label="模型" value={settings.chat.model} onChange={(v) => void patch('chat', { ...settings.chat, model: v })} />
         <Row label="API Base" value={settings.chat.apiBase} onChange={(v) => void patch('chat', { ...settings.chat, apiBase: v })} />
@@ -63,6 +75,23 @@ export function SettingsPanel(_props: Props): React.ReactNode {
           <input type="range" min={0} max={24} value={settings.visual.glassBlur} onChange={(e) => void patch('visual', { ...settings.visual, glassBlur: Number(e.target.value) })} />
         </label>
       </section>
+
+      {settings.capabilityMode === 'super' ? (
+        <section className={styles.section}>
+          <h4 className={styles.sub}>QQ 群接入</h4>
+          <Toggle label="启用 QQ Bot" checked={settings.qq.enabled} onChange={(v) => void patch('qq', { ...settings.qq, enabled: v })} />
+          <Row label="AppID" value={settings.qq.appId} onChange={(v) => void patch('qq', { ...settings.qq, appId: v })} />
+          <Row label="AppSecret" value={settings.qq.appSecret} type="password" onChange={(v) => void patch('qq', { ...settings.qq, appSecret: v })} />
+          <label className={styles.row}>
+            <span className={styles.label}>群号白名单</span>
+            <input value={settings.qq.groupAllow.join(', ')} onChange={(e) => void patch('qq', { ...settings.qq, groupAllow: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} />
+          </label>
+          <label className={styles.row}>
+            <span className={styles.label}>QQ 人格提示词</span>
+            <textarea className={styles.longTextarea} value={settings.qq.personaPrompt} onChange={(e) => void patch('qq', { ...settings.qq, personaPrompt: e.target.value })} />
+          </label>
+        </section>
+      ) : null}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { useSettings } from '../settings.ts'
 import { useShiningStore, closeChat } from '../store.ts'
 import { useChat } from '../hooks/useChat.ts'
 import { FriendCircle } from './FriendCircle.tsx'
+import { QqSessions } from './QqSessions.tsx'
 import { useDshContext, dshContextToText, sendToSession, getCurrentSessionId } from '../dsh-context.ts'
 import { readMemoryContext } from '../memory.ts'
 import { getShiningRemote } from '../remote-types.ts'
@@ -20,7 +21,7 @@ const MODE_LABEL: Record<string, string> = { pet: '萌宠', assistant: '助理',
 export function ChatWindow(_props: Props): React.ReactNode {
   const { chatOpen } = useShiningStore()
   const settings = useSettings()
-  const [tab, setTab] = useState<'chat' | 'circle'>('chat')
+  const [tab, setTab] = useState<'chat' | 'circle' | 'qq'>('chat')
   const [input, setInput] = useState('')
   const [confirmSend, setConfirmSend] = useState(false)
   const dshContext = useDshContext()
@@ -71,6 +72,7 @@ export function ChatWindow(_props: Props): React.ReactNode {
         <nav className={styles.tabs}>
           <button className={tab === 'chat' ? styles.tabActive : styles.tab} onClick={() => setTab('chat')}>聊天</button>
           <button className={tab === 'circle' ? styles.tabActive : styles.tab} onClick={() => setTab('circle')}>朋友圈</button>
+          {mode === 'super' ? <button className={tab === 'qq' ? styles.tabActive : styles.tab} onClick={() => setTab('qq')}>QQ 会话</button> : null}
         </nav>
         {tab === 'chat' ? (<>
           <ul className={styles.messages}>
@@ -89,8 +91,10 @@ export function ChatWindow(_props: Props): React.ReactNode {
             <button className={styles.send} onClick={doSend} disabled={busy}>{dict.zh.send}</button>
             {canDelegate ? <button className={styles.delegate} onClick={doDelegate} disabled={busy}>委派到 DSH</button> : null}
           </footer>
-        </>) : (
+        </>) : tab === 'circle' ? (
           <FriendCircle personaId={settings.chat.personaId || 'default'} />
+        ) : (
+          <QqSessions />
         )}
       </section>
       {confirmSend ? (
