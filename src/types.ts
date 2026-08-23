@@ -49,3 +49,19 @@ export interface GitOpValue { output: string }
 export interface ChatMessage { role: 'system' | 'user' | 'assistant'; content: string }
 export interface ChatRequest { messages: ChatMessage[]; model: string; apiBase: string; apiKey: string }
 export interface ChatValue { content: string }
+
+// ── QQ 会话视图（host 会话层 → GUI） ──
+export interface QqMessageView { role: 'user' | 'assistant'; content: string }
+export interface QqSessionView {
+  key: string
+  peerId: string
+  kind: 'group' | 'c2c'
+  messages: QqMessageView[]
+  updatedAt: number
+}
+export interface QqListRequest {}
+export interface QqListValue { sessions: QqSessionView[] }
+export interface QqReadRequest { key: string }
+export interface QqReadValue { session?: QqSessionView }
+export interface QqSendRequest { key: string; content: string }
+export interface QqSendValue { ok: boolean }

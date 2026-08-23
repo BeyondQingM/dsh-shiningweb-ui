@@ -27,4 +27,7 @@ export const methods = [
   { method: 'gitCreateBranch', request: 'z.object({ root: z.string(), repoPath: z.string(), name: z.string() })', result: shiningResult('z.object({ output: z.string() })') },
   { method: 'gitPull', request: rootRepo, result: shiningResult('z.object({ output: z.string() })') },
   { method: 'chat', request: 'z.object({ messages: z.array(z.object({ role: z.union([z.literal("system"), z.literal("user"), z.literal("assistant")]), content: z.string() })), model: z.string(), apiBase: z.string(), apiKey: z.string() })', result: shiningResult('z.object({ content: z.string() })') },
+  { method: 'qqList', request: 'z.object({})', result: shiningResult('z.object({ sessions: z.array(z.object({ key: z.string(), peerId: z.string(), kind: z.union([z.literal("group"), z.literal("c2c")]), messages: z.array(z.object({ role: z.union([z.literal("user"), z.literal("assistant")]), content: z.string() })), updatedAt: z.number() })) })') },
+  { method: 'qqRead', request: 'z.object({ key: z.string() })', result: shiningResult('z.object({ session: z.unknown().optional() })') },
+  { method: 'qqSend', request: 'z.object({ key: z.string(), content: z.string() })', result: shiningResult('z.object({ ok: z.boolean() })') },
 ]

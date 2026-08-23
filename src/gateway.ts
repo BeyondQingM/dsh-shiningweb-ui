@@ -13,9 +13,17 @@ import type {
   ChatRequest, ChatValue, FsEntry, FsListRequest, FsListValue, FsOpValue, FsPathRequest,
   FsReadRequest, FsReadValue, FsRenameRequest, FsWriteRequest, GitBranchRequest,
   GitChange, GitCreateBranchRequest, GitOpValue, GitPathRequest, GitStatusRequest,
-  GitStatusValue, ShiningResult,
+  GitStatusValue, QqListRequest, QqListValue, QqReadRequest, QqReadValue, QqSendRequest,
+  QqSendValue, QqSessionView, ShiningResult,
 } from './types.ts'
 import { failure, resolveWithinRoot, success } from './types.ts'
+
+declare module '@deepseek-ai/cordis' {
+  interface Context {
+    /** QQ 会话层服务（qq 未启用时 optional）。 */
+    shiningQq?: import('./qq.ts').ShiningQqService | undefined
+  }
+}
 
 const execFileAsync = promisify(execFile)
 
@@ -189,6 +197,40 @@ export class ShiningService extends TypertRemoteService {
       return success({ content: data.choices?.[0]?.message?.content ?? '' })
     } catch (error) {
       return failure('chat-error', error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  @Remote('qqList')
+  async qqList(_request: QqListRequest): Promise<ShiningResult<QqListValue>> {
+    try {
+      const svc = this.ctx.shiningQq
+      const sessions: QqSessionView[] = (svc?.list() ?? []).map((s) => ({ key: s.key, peerId: s.peerId, kind: s.kind, messages: s.messages, updatedAt: s.updatedAt }))
+      return success({ sessions })
+    } catch (error) {
+      return failure('qq-error', error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  @Remote('qqRead')
+  async qqRead(request: QqReadRequest): Promise<ShiningResult<QqReadValue>> {
+    try {
+      const svc = this.ctx.shiningQq
+      const s = svc?.read(request.key)
+      return success({ session: s ? { key: s.key, peerId: s.peerId, kind: s.kind, messages: s.messages, updatedAt: s.updatedAt } : undefined })
+    } catch (error) {
+      return failure('qq-error', error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  @Remote('qqSend')
+  async qqSend(request: QqSendRequest): Promise<ShiningResult<QqSendValue>> {
+    try {
+      const svc = this.ctx.shiningQq
+      if (!svc) return failure('qq-error', 'qq service not enabled')
+      await svc.sendTo(request.key, request.content)
+      return success({ ok: true })
+    } catch (error) {
+      return failure('qq-error', error instanceof Error ? error.message : String(error))
     }
   }
 }

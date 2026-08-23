@@ -25,6 +25,12 @@ const req_gitPull = z.object({ root: z.string(), repoPath: z.string() })
 const res_gitPull = z.union([z.object({ ok: z.literal(true), value: z.object({ output: z.string() }) }), z.object({ ok: z.literal(false), error: z.object({ code: z.string(), message: z.string() }) })])
 const req_chat = z.object({ messages: z.array(z.object({ role: z.union([z.literal("system"), z.literal("user"), z.literal("assistant")]), content: z.string() })), model: z.string(), apiBase: z.string(), apiKey: z.string() })
 const res_chat = z.union([z.object({ ok: z.literal(true), value: z.object({ content: z.string() }) }), z.object({ ok: z.literal(false), error: z.object({ code: z.string(), message: z.string() }) })])
+const req_qqList = z.object({})
+const res_qqList = z.union([z.object({ ok: z.literal(true), value: z.object({ sessions: z.array(z.object({ key: z.string(), peerId: z.string(), kind: z.union([z.literal("group"), z.literal("c2c")]), messages: z.array(z.object({ role: z.union([z.literal("user"), z.literal("assistant")]), content: z.string() })), updatedAt: z.number() })) }) }), z.object({ ok: z.literal(false), error: z.object({ code: z.string(), message: z.string() }) })])
+const req_qqRead = z.object({ key: z.string() })
+const res_qqRead = z.union([z.object({ ok: z.literal(true), value: z.object({ session: z.unknown().optional() }) }), z.object({ ok: z.literal(false), error: z.object({ code: z.string(), message: z.string() }) })])
+const req_qqSend = z.object({ key: z.string(), content: z.string() })
+const res_qqSend = z.union([z.object({ ok: z.literal(true), value: z.object({ ok: z.boolean() }) }), z.object({ ok: z.literal(false), error: z.object({ code: z.string(), message: z.string() }) })])
 
 export const TYPERT_REMOTE = {
   package: 'dsh-shiningweb-ui',
@@ -171,6 +177,42 @@ export const TYPERT_REMOTE = {
         { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#chatRequest', schema: req_chat } },
       ],
       result: { mode: 'strict' as const, typeSymbol: '#chatResult', schema: res_chat },
+      sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
+    },
+    {
+      id: 'dsh-shiningweb-ui#shining/qqList',
+      service: 'shining',
+      namespace: 'shining',
+      method: 'qqList',
+      invocation: { kind: 'direct' as const },
+      parameters: [
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#qqListRequest', schema: req_qqList } },
+      ],
+      result: { mode: 'strict' as const, typeSymbol: '#qqListResult', schema: res_qqList },
+      sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
+    },
+    {
+      id: 'dsh-shiningweb-ui#shining/qqRead',
+      service: 'shining',
+      namespace: 'shining',
+      method: 'qqRead',
+      invocation: { kind: 'direct' as const },
+      parameters: [
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#qqReadRequest', schema: req_qqRead } },
+      ],
+      result: { mode: 'strict' as const, typeSymbol: '#qqReadResult', schema: res_qqRead },
+      sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
+    },
+    {
+      id: 'dsh-shiningweb-ui#shining/qqSend',
+      service: 'shining',
+      namespace: 'shining',
+      method: 'qqSend',
+      invocation: { kind: 'direct' as const },
+      parameters: [
+        { name: 'request', wire: 'request', source: 'json' as const, codec: { mode: 'strict' as const, typeSymbol: '#qqSendRequest', schema: req_qqSend } },
+      ],
+      result: { mode: 'strict' as const, typeSymbol: '#qqSendResult', schema: res_qqSend },
       sourceLocation: { file: 'src/gateway.ts', line: 1, column: 1 },
     }
   ],
