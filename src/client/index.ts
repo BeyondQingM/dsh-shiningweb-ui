@@ -64,8 +64,8 @@ export async function apply(ctx: ClientContext): Promise<void> {
   // 文件栏抽屉（shell.overlay）。
   ctx.slots.inject('shell.overlay', () => ctx.slots.register({ name: 'shell.overlay', id: 'shining-files' }, FileExplorer))
 
-  // Git 工具栏（conversation.input.dock）。
-  ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'shining-git' }, GitManager))
+  // Git 工具栏（conversation.input.dock）。order 10：介于 DSH 内置 todo(0) 与 queue(20) 之间。
+  ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'shining-git', order: 10 }, GitManager))
 
   // 设置页（settings.section）。
   ctx.slots.inject('settings.section', () => ctx.slots.register({ name: 'settings.section', id: 'shining', order: 20, locale: NS }, SettingsPanel))

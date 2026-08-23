@@ -1,8 +1,14 @@
 .bar {
+  /* 对齐 DSH composer 卡片：与内置 input.dock 条目一致的居中宽度。 */
+  box-sizing: border-box;
+  width: calc(100% - var(--dsh-composer-side-clearance) - var(--dsh-composer-side-clearance) - var(--dsh-composer-dock-inset) - var(--dsh-composer-dock-inset));
+  max-width: calc(var(--dsh-composer-card-max-width) - var(--dsh-composer-dock-inset) - var(--dsh-composer-dock-inset));
+  margin: 0 auto;
+  padding: 0 var(--dsh-composer-dock-inset);
+  flex: none;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
   font-size: 12px;
   color: var(--dsw-alias-label-secondary);
 }
