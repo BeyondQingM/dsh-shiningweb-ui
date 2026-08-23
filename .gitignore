@@ -1,7 +1,7 @@
 node_modules
-lib
 *.log
 *.tsbuildinfo
 .DS_Store
 .npm-cache
 .pnpm-store
+lib/**/*.map
