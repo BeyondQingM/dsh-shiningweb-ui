@@ -25,7 +25,9 @@ import { GitManager } from './components/GitManager.tsx'
 import { SettingsPanel } from './components/SettingsPanel.tsx'
 
 /** Required services。不注入 'remote.shining'（我们自己在 apply 里挂载，声明为依赖会死锁）。 */
-export const inject = ['slots', 'remote', 'locale', 'settingsScope', 'connection']
+// 注意：`ctx.workspaces`/`ctx.sessions` 必须在此声明，否则 cordis 属性访问会抛
+// "cannot get property ... without inject"（runtime 在插件 apply 前已 provide 出这两个服务）。
+export const inject = ['slots', 'remote', 'locale', 'settingsScope', 'connection', 'workspaces', 'sessions']
 
 /** Client plugin body。 */
 export async function apply(ctx: ClientContext): Promise<void> {
