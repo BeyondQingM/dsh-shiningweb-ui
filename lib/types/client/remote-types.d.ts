@@ -1,7 +1,3 @@
-/**
- * ctx.remote.shining 的客户端类型面 + 实例绑定。
- * 网关 $mount 后 ctx.remote.shining 即存在；此处声明其命名空间形状与访问器。
- */
 import type { RemoteResult } from '@deepseek-ai/dsh-typert-protocol';
 import type { ChatRequest, ChatValue, FsListRequest, FsListValue, FsPathRequest, FsOpValue, FsReadRequest, FsReadValue, FsRenameRequest, FsWriteRequest, GitBranchRequest, GitCreateBranchRequest, GitOpValue, GitPathRequest, GitStatusRequest, GitStatusValue, QqListRequest, QqListValue, QqReadRequest, QqReadValue, QqSendRequest, QqSendValue } from '../types.ts';
 /** ctx.remote.shining 命名空间方法面。 */
@@ -32,3 +28,5 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
 export declare function setShiningRemote(r: ShiningRemote | undefined): void;
 /** 组件读取当前 remote 实例（apply 后即稳定）。 */
 export declare function getShiningRemote(): ShiningRemote | undefined;
+/** 响应式读 remote 实例（apply 挂载后变化一次，供组件订阅避免初渲染读到 undefined）。 */
+export declare function useShiningRemote(): ShiningRemote | undefined;

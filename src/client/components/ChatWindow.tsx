@@ -9,7 +9,7 @@ import { FriendCircle } from './FriendCircle.tsx'
 import { QqSessions } from './QqSessions.tsx'
 import { useDshContext, dshContextToText, sendToSession, getCurrentSessionId } from '../dsh-context.ts'
 import { readMemoryContext } from '../memory.ts'
-import { getShiningRemote } from '../remote-types.ts'
+import { useShiningRemote } from '../remote-types.ts'
 import { getImage, setImage, clearImage, compressImage } from '../storage.ts'
 import { dict } from '../locales.ts'
 import styles from './ChatWindow.module.css'
@@ -25,7 +25,7 @@ export function ChatWindow(_props: Props): React.ReactNode {
   const [input, setInput] = useState('')
   const [confirmSend, setConfirmSend] = useState(false)
   const dshContext = useDshContext()
-  const { rec, busy, send } = useChat(settings.chat.personaId || 'default', getShiningRemote(), settings)
+  const { rec, busy, send } = useChat(settings.chat.personaId || 'default', useShiningRemote(), settings)
 
   if (!chatOpen || !settings.enabled || !settings.chat.enabled) return null
 

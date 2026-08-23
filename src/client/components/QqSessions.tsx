@@ -1,6 +1,6 @@
 /** 天圆地方 QQ 会话视图（从 host 会话层读取 + 回复）。 */
 import { useEffect, useState } from 'react'
-import { getShiningRemote } from '../remote-types.ts'
+import { useShiningRemote } from '../remote-types.ts'
 import type { QqSessionView } from '../../types.ts'
 import styles from './QqSessions.module.css'
 
@@ -8,10 +8,10 @@ export function QqSessions(): React.ReactNode {
   const [sessions, setSessions] = useState<QqSessionView[]>([])
   const [open, setOpen] = useState<QqSessionView | null>(null)
   const [draft, setDraft] = useState('')
-  const remote = getShiningRemote()
+  const remote = useShiningRemote()
 
   const refresh = () => { void remote?.qqList({}).then((r) => { if (r.ok) setSessions(r.value.sessions) }) }
-  useEffect(() => { refresh() }, [])
+  useEffect(() => { refresh() }, [remote])
 
   const openSession = (s: QqSessionView) => {
     if (remote) void remote.qqRead({ key: s.key }).then((r) => { if (r.ok && r.value.session) setOpen(r.value.session) })

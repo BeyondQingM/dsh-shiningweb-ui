@@ -4,8 +4,8 @@ import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { useSettings } from '../settings.ts'
 import { useGitBranch } from '../hooks/useGitBranch.ts'
-import { getShiningRemote } from '../remote-types.ts'
-import { getWorkspaceRoot } from '../workspace.ts'
+import { useShiningRemote } from '../remote-types.ts'
+import { useWorkspaceRoot } from '../workspace.ts'
 import { dict } from '../locales.ts'
 import styles from './GitManager.module.css'
 
@@ -15,8 +15,10 @@ const REFRESH_MS: Record<string, number> = { '10s': 10000, '30s': 30000, '1m': 6
 
 export function GitManager(_props: Props): React.ReactNode {
   const settings = useSettings()
-  const remote = getShiningRemote()
-  const root = getWorkspaceRoot()
+  // 响应式读 remote/root：apply 之后才异步挂载/设置，若初渲染读到 undefined/空，
+  // 这里会在就绪时重渲染并使 effect 重跑，从而真正刷新（而不是永远无分支）。
+  const remote = useShiningRemote()
+  const root = useWorkspaceRoot()
   const git = useGitBranch(root, remote)
   const [branches, setBranches] = useState<string[]>([])
   const [newBranch, setNewBranch] = useState('')
