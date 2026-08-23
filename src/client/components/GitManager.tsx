@@ -30,14 +30,18 @@ export function GitManager(_props: Props): React.ReactNode {
     if (!root || !remote) { setGitErr(remote ? '未获取到工作区' : '远程服务未就绪'); return }
     let alive = true
     const refresh = async () => {
-      const res = await remote.gitStatus({ root, repoPath: '.' })
-      if (!alive) return
-      if (res.ok) {
-        git.refresh()
-        setBranches([res.value.branch])
-        setGitErr('')
-      } else {
-        setGitErr(res.error.message)
+      try {
+        const res = await remote.gitStatus({ root: root || '/', repoPath: '.' })
+        if (!alive) return
+        if (res.ok) {
+          git.refresh()
+          setBranches([res.value.branch])
+          setGitErr('')
+        } else {
+          setGitErr(res.error.message)
+        }
+      } catch (e) {
+        if (alive) setGitErr(e instanceof Error ? `remote调用失败: ${e.message}` : String(e))
       }
     }
     void refresh()
