@@ -9,19 +9,24 @@ export const SETTINGS_NAMESPACE = 'shining'
 
 export type ThemeColor = 'galaxy-blue' | 'dawn-gold' | 'aurora-purple'
 export type GitAutoRefresh = 'off' | '10s' | '30s' | '1m'
+/** 分级能力模式：pet（默认）/ assistant / super。 */
+export type CapabilityMode = 'pet' | 'assistant' | 'super'
 
 /** 设置文档的可持久化形态。 */
 export interface ShiningSettings {
   enabled: boolean
+  capabilityMode: CapabilityMode
   chat: { enabled: boolean; personaId: string; model: string; apiBase: string; apiKey: string }
   fileExplorer: { enabled: boolean; showHidden: boolean }
   git: { enabled: boolean; autoRefresh: GitAutoRefresh }
   visual: { themeColor: ThemeColor; glassBlur: number }
+  qq: { enabled: boolean; appId: string; appSecret: string; groupAllow: string[]; personaPrompt: string }
 }
 
 /** 设置 schema：wire 校验与默认值。 */
 export const ShiningSettingsSchema = s.object({
   enabled: s.boolean().default(true),
+  capabilityMode: s.union([s.const('pet'), s.const('assistant'), s.const('super')]).default('pet'),
   chat: s.object({
     enabled: s.boolean().default(true),
     personaId: s.string().default(''),
@@ -41,13 +46,28 @@ export const ShiningSettingsSchema = s.object({
     themeColor: s.union([s.const('galaxy-blue'), s.const('dawn-gold'), s.const('aurora-purple')]).default('galaxy-blue'),
     glassBlur: s.number().min(0).max(24).default(12),
   }).default({ themeColor: 'galaxy-blue', glassBlur: 12 }),
+  qq: s.object({
+    enabled: s.boolean().default(false),
+    appId: s.string().default(''),
+    appSecret: s.string().default(''),
+    groupAllow: s.array(s.string()).default([]),
+    personaPrompt: s.string().default('你是天圆地方，一位温柔而能干的助理。请用简洁、亲切的中文回答。'),
+  }).default({
+    enabled: false, appId: '', appSecret: '', groupAllow: [],
+    personaPrompt: '你是天圆地方，一位温柔而能干的助理。请用简洁、亲切的中文回答。',
+  }),
 })
 
 /** schema 校验通过的默认值。 */
 export const DEFAULT_SHINING_SETTINGS: ShiningSettings = {
   enabled: true,
+  capabilityMode: 'pet',
   chat: { enabled: true, personaId: '', model: 'deepseek-chat', apiBase: 'https://api.deepseek.com', apiKey: '' },
   fileExplorer: { enabled: true, showHidden: false },
   git: { enabled: true, autoRefresh: 'off' },
   visual: { themeColor: 'galaxy-blue', glassBlur: 12 },
+  qq: {
+    enabled: false, appId: '', appSecret: '', groupAllow: [],
+    personaPrompt: '你是天圆地方，一位温柔而能干的助理。请用简洁、亲切的中文回答。',
+  },
 }

@@ -21,4 +21,15 @@ describe('ShiningSettingsSchema', () => {
     const parsed = ShiningSettingsSchema(DEFAULT_SHINING_SETTINGS)
     expect(parsed).toMatchObject(DEFAULT_SHINING_SETTINGS)
   })
+
+  it('defaults capabilityMode to pet and qq disabled', () => {
+    const parsed = ShiningSettingsSchema({})
+    expect(parsed.capabilityMode).toBe('pet')
+    expect(parsed.qq.enabled).toBe(false)
+    expect(parsed.qq.groupAllow).toEqual([])
+  })
+
+  it('rejects an invalid capabilityMode', () => {
+    expect(() => ShiningSettingsSchema({ capabilityMode: 'god' })).toThrow()
+  })
 })
