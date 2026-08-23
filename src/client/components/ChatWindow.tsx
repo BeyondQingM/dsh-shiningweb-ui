@@ -5,6 +5,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import { useSettings } from '../settings.ts'
 import { useShiningStore, closeChat } from '../store.ts'
 import { useChat } from '../hooks/useChat.ts'
+import { FriendCircle } from './FriendCircle.tsx'
 import { useDshContext, dshContextToText, sendToSession, getCurrentSessionId } from '../dsh-context.ts'
 import { readMemoryContext } from '../memory.ts'
 import { getShiningRemote } from '../remote-types.ts'
@@ -19,6 +20,7 @@ const MODE_LABEL: Record<string, string> = { pet: '萌宠', assistant: '助理',
 export function ChatWindow(_props: Props): React.ReactNode {
   const { chatOpen } = useShiningStore()
   const settings = useSettings()
+  const [tab, setTab] = useState<'chat' | 'circle'>('chat')
   const [input, setInput] = useState('')
   const [confirmSend, setConfirmSend] = useState(false)
   const dshContext = useDshContext()
@@ -66,22 +68,30 @@ export function ChatWindow(_props: Props): React.ReactNode {
           {backgroundImage ? <button className={styles.close} onClick={clearImage} aria-label="clear image">清除立绘</button> : null}
           <button className={styles.close} onClick={closeChat} aria-label={dict.zh.close}>×</button>
         </header>
-        <ul className={styles.messages}>
-          {(rec?.messages ?? []).map((m, i) => (
-            <li key={i} className={m.role === 'user' ? styles.user : styles.assistant}>{m.content}</li>
-          ))}
-        </ul>
-        <footer className={styles.footer}>
-          <input
-            className={styles.input}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={dict.zh.sendPlaceholder}
-            onKeyDown={(e) => { if (e.key === 'Enter') doSend() }}
-          />
-          <button className={styles.send} onClick={doSend} disabled={busy}>{dict.zh.send}</button>
-          {canDelegate ? <button className={styles.delegate} onClick={doDelegate} disabled={busy}>委派到 DSH</button> : null}
-        </footer>
+        <nav className={styles.tabs}>
+          <button className={tab === 'chat' ? styles.tabActive : styles.tab} onClick={() => setTab('chat')}>聊天</button>
+          <button className={tab === 'circle' ? styles.tabActive : styles.tab} onClick={() => setTab('circle')}>朋友圈</button>
+        </nav>
+        {tab === 'chat' ? (<>
+          <ul className={styles.messages}>
+            {(rec?.messages ?? []).map((m, i) => (
+              <li key={i} className={m.role === 'user' ? styles.user : styles.assistant}>{m.content}</li>
+            ))}
+          </ul>
+          <footer className={styles.footer}>
+            <input
+              className={styles.input}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={dict.zh.sendPlaceholder}
+              onKeyDown={(e) => { if (e.key === 'Enter') doSend() }}
+            />
+            <button className={styles.send} onClick={doSend} disabled={busy}>{dict.zh.send}</button>
+            {canDelegate ? <button className={styles.delegate} onClick={doDelegate} disabled={busy}>委派到 DSH</button> : null}
+          </footer>
+        </>) : (
+          <FriendCircle personaId={settings.chat.personaId || 'default'} />
+        )}
       </section>
       {confirmSend ? (
         <div className={styles.confirm}>
