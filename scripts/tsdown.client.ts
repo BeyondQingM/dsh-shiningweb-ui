@@ -322,10 +322,10 @@ function clientConfig(id: string, entry: string): UserConfig {
     dts: false,
     sourcemap: true,
     clean: false,
-    deps: {
-      neverBundle: isRequested,
-      alwaysBundle: (specifier: string) => !isRequested(specifier),
-    },
+    // rolldown 原生控制：平台模块表提供的 specifier 保持 external（由模块表解析），
+    // 其余（zod、schemastery 等非平台依赖）一律 bundle 进产物，避免模块表无法解析的 require。
+    external: [...clientExternals(id)],
+    noExternal: (specifier: string) => !clientExternals(id).has(specifier),
     define: {
       ...clientBuildEnvironmentDefines(process.env),
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),

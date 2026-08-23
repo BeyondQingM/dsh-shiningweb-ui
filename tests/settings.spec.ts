@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { ShiningSettingsSchema, DEFAULT_SHINING_SETTINGS } from '../src/settings.ts'
+import { ShiningSettingsSchema } from '../src/settings-schema.ts'
+import { DEFAULT_SHINING_SETTINGS } from '../src/settings.ts'
 
 describe('ShiningSettingsSchema', () => {
   it('applies defaults when no section is supplied', () => {

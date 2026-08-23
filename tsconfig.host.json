@@ -8,5 +8,5 @@
     "composite": true,
     "types": ["node"]
   },
-  "include": ["src/index.ts", "src/settings.ts", "src/types.ts", "src/invariant.ts", "src/gateway.ts", "src/qq.ts"]
+  "include": ["src/index.ts", "src/settings.ts", "src/settings-schema.ts", "src/types.ts", "src/invariant.ts", "src/gateway.ts", "src/qq.ts"]
 }
