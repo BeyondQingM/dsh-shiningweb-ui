@@ -89,7 +89,6 @@
     "typecheck": "tsc -p tsconfig.host.json && tsc -p tsconfig.client.json",
     "gen:typert": "node scripts/gen-typert.mjs",
     "build": "tsc -p tsconfig.host.json && node scripts/gen-typert.mjs && tsdown",
-    "prepare": "npm run build",
     "bundle": "tsdown",
     "watch": "tsdown --watch",
     "test": "vitest run",
