@@ -32,3 +32,15 @@ describe('client stays decoupled from schemastery (source)', () => {
     expect(code).toContain('@deepseek-ai/schemastery')
   })
 })
+
+describe('client settings scope publishes a value (decode regression)', () => {
+  // 回归守卫：settingsScope.bind 缺省 decode 时，client 无法 rehydrate host 的
+  // schemastery schema 信封，value 永不发布 → 设置 UI 永远显示深合并默认值、写操作无法反映。
+  // 必须提供 decode 走 mergeSettings。
+  it('binds the shining namespace with a decode', () => {
+    const code = codeOf('client/index.ts')
+    expect(code).toMatch(/settingsScope\.bind<ShiningSettings>\(\{/)
+    expect(code).toContain('namespace: SETTINGS_NAMESPACE')
+    expect(code).toContain('decode: (section) => mergeSettings(section')
+  })
+})
