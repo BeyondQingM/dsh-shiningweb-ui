@@ -23,15 +23,21 @@ export function GitManager(_props: Props): React.ReactNode {
   const [branches, setBranches] = useState<string[]>([])
   const [newBranch, setNewBranch] = useState('')
   const [busy, setBusy] = useState(false)
+  const [gitErr, setGitErr] = useState('')
 
   useEffect(() => {
-    if (!settings.enabled || !settings.git.enabled || !root || !remote) return
+    if (!settings.enabled || !settings.git.enabled) return
+    if (!root || !remote) { setGitErr(remote ? '未获取到工作区' : '远程服务未就绪'); return }
     let alive = true
     const refresh = async () => {
       const res = await remote.gitStatus({ root, repoPath: '.' })
-      if (alive && res.ok) {
+      if (!alive) return
+      if (res.ok) {
         git.refresh()
         setBranches([res.value.branch])
+        setGitErr('')
+      } else {
+        setGitErr(res.error.message)
       }
     }
     void refresh()
@@ -75,6 +81,7 @@ export function GitManager(_props: Props): React.ReactNode {
       <button className={styles.btn} onClick={() => void doCreate()} disabled={busy}>+</button>
       <button className={styles.btn} onClick={() => void doPull()} disabled={busy}>pull</button>
       <span className={styles.dirty}>{dict.zh.dirtyCount} {git.state.dirtyCount}</span>
+      {gitErr ? <span className={styles.err} title={gitErr}>{gitErr}</span> : null}
     </div>
   )
 }

@@ -36,3 +36,4 @@
   color: var(--dsw-alias-label-primary);
 }
 .dirty { margin-left: auto; }
+.err { color: var(--dsw-alias-state-error-primary, #f56c6c); font-size: 11px; }

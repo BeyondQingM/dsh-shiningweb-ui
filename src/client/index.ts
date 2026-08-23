@@ -12,7 +12,7 @@ import type {} from './slots.ts'
 import type { ShiningSettings } from '../settings.ts'
 import { SETTINGS_NAMESPACE } from '../settings.ts'
 import { dict, NS } from './locales.ts'
-import { bindSettingsScope } from './settings.ts'
+import { bindSettingsScope, mergeSettings } from './settings.ts'
 import { applyVisual } from './visual.ts'
 import TYPERT_REMOTE from './remote.ts'
 import { setShiningRemote, type ShiningRemote } from './remote-types.ts'
@@ -43,7 +43,12 @@ export async function apply(ctx: ClientContext): Promise<void> {
   bindDshCtx(ctx)
 
   // 绑定设置命名空间，订阅并应用视觉主题。
-  const scope = ctx.settingsScope.bind<ShiningSettings>({ namespace: SETTINGS_NAMESPACE })
+  // 注意：必须提供 decode —— client bundle 不含 schemastery，无法 rehydrate host 的 schema 信封，
+  // 缺省 decode 会让 settingsScope 不发布 value（UI 永远显示深合并默认值、写操作无法反映）。
+  const scope = ctx.settingsScope.bind<ShiningSettings>({
+    namespace: SETTINGS_NAMESPACE,
+    decode: (section) => mergeSettings(section as Partial<ShiningSettings> | undefined),
+  })
   bindSettingsScope(scope)
   ctx.effect(() => scope.subscribe(() => applyVisual(scope.getSnapshot().value)), 'shining: visual subscription')
   applyVisual(scope.getSnapshot().value)
