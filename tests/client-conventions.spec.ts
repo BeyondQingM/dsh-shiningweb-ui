@@ -33,6 +33,13 @@ describe('client stays decoupled from schemastery (source)', () => {
   })
 })
 
+describe('client settings section has a visible navigation label', () => {
+  it('registers settings.section with a localized label', () => {
+    const code = codeOf('client/index.ts')
+    expect(code).toMatch(/name: 'settings\.section',[\s\S]*id: 'shining',[\s\S]*label: \(\) =>/)
+  })
+})
+
 describe('client settings scope publishes a value (decode regression)', () => {
   // 回归守卫：settingsScope.bind 缺省 decode 时，client 无法 rehydrate host 的
   // schemastery schema 信封，value 永不发布 → 设置 UI 永远显示深合并默认值、写操作无法反映。

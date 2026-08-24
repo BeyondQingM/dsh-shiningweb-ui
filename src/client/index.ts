@@ -75,6 +75,12 @@ export async function apply(ctx: ClientContext): Promise<void> {
   // Git 工具栏（conversation.input.dock）。order 10：介于 DSH 内置 todo(0) 与 queue(20) 之间。
   ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({ name: 'conversation.input.dock', id: 'shining-git', order: 10 }, GitManager))
 
-  // 设置页（settings.section）。
-  ctx.slots.inject('settings.section', () => ctx.slots.register({ name: 'settings.section', id: 'shining', order: 20, locale: NS }, SettingsPanel))
+  // 设置页（settings.section）。label 是设置左栏的可见名称；locale 只负责组件的 t 注入。
+  ctx.slots.inject('settings.section', () => ctx.slots.register({
+    name: 'settings.section',
+    id: 'shining',
+    order: 20,
+    label: () => dict.zh.settingsTitle,
+    locale: NS,
+  }, SettingsPanel))
 }
