@@ -1,6 +1,9 @@
 # dsh-shiningweb-ui（璀璨星河）
 
-一个为 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 打造的 UI 增强插件：独立的 AI 人格空间「天圆地方」、类 VS Code 文件栏、Git 分支管理、QQ 群接入、记忆与朋友圈、以及可自定义的视觉主题。所有模块可在设置面板独立开关。
+一个为 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 打造的 UI 增强插件：独立的 AI 人格空间「天圆地方」、类 VS Code 文件栏、Git 分支管理、QQ 群接入、记忆与朋友圈，以及一套会**真正改变界面观感**的视觉主题。所有模块可在设置面板独立开关。
+
+- 版本：`v0.1.0-rc4`
+- 许可证：[MIT](LICENSE)
 
 ## ✨ 功能特性
 
@@ -9,9 +12,20 @@
 | **天圆地方** | 独立 AI 聊天空间：独立的模型与人格配置、立绘背景、记忆、朋友圈 |
 | **分级能力模式** | 萌宠 / 助理 / 超级助理，渐进式权限；超级助理可代发任务给 DSH 会话并接入 QQ |
 | **QQ 群接入** | 让「天圆地方」作为 QQ 机器人接入群聊/私聊，回复使用天圆地方独立人格 |
-| **文件栏** | 侧边栏文件树：展开/折叠、右键菜单、搜索过滤、用系统应用打开文件 |
-| **Git 分支管理** | 对话框下方的工具栏：切换/创建分支、拉取更新、未提交文件数 |
-| **视觉增强** | 主题色（星河蓝/晨曦金/极光紫）、毛玻璃强度、自定义背景 |
+| **文件栏** | 侧边栏文件树：展开/折叠（懒加载）、右键菜单、搜索过滤、用系统应用打开文件 |
+| **Git 分支管理** | 会话输入框上方的工具栏：切换/创建分支、拉取更新、显示未提交文件数 |
+| **视觉主题** | `星河蓝 / 晨曦金 / 极光紫` 三套主题，带动画渐变、辉光、描边、柔和底色与聚焦光圈；可调毛玻璃强度（默认 12px）、可设聊天窗背景立绘 |
+
+## 🎨 视觉主题
+
+在设置面板 → 「璀璨星河」→「视觉主题」中选择主色调，或调节毛玻璃强度。切换后**立即**应用到插件所有界面（无需重启）：
+
+- **侧边栏入口**：图标着色 + 悬停柔和底色
+- **天圆地方聊天窗**：用户气泡与发送按钮的渐变、面板描边与辉光、输入框聚焦光圈、激活 Tab、委派按钮
+- **文件栏抽屉**：描边、搜索聚焦、行 hover、图标、右键菜单
+- **Git 栏**：分支/新分支输入聚焦、操作按钮描边与悬停
+- **设置页**：分区描边、开关与滑杆使用主题色
+- **朋友圈 / QQ 会话**：发布、发送、用户气泡渐变、卡片 hover
 
 ## 📦 安装
 
@@ -34,7 +48,7 @@ dsh plugin --profile web add "file:/path/to/dsh-shiningweb-ui"
 
 > 仓库已预构建 `lib/` 产物，安装即用、无需本地构建。若从源码目录安装并自行修改了源码，需先执行构建：`npm install && npm run build` 重新生成 `lib/`。
 
-## 🎨 使用说明
+## 🎮 使用说明
 
 安装重启后：
 
@@ -51,17 +65,33 @@ dsh plugin --profile web add "file:/path/to/dsh-shiningweb-ui"
 - **能力模式**：萌宠 / 助理 / 超级助理。
 - **天圆地方**：独立模型的 Base URL、API Key、模型名、立绘上传。
 - **文件栏**：显示隐藏文件。
-- **Git 分支管理**：自动刷新间隔。
-- **视觉主题**：主色调、毛玻璃强度。
+- **Git 分支管理**：自动刷新间隔（关闭 / 10s / 30s / 1m）。
+- **视觉主题**：主色调（星河蓝 / 晨曦金 / 极光紫）、毛玻璃强度（0–24px）。
 - **QQ 群接入**（仅超级助理模式可见）：启用、AppID、AppSecret、群号白名单、QQ 人格提示词。
 
-> 独立模型的 API Key 保存在本机 DSH 设置文档中；QQ 凭据同理。请妥善保管。
+> 独立模型的 API Key 与 QQ 凭据保存在本机 DSH 设置文档中，请在「天圆地方」模型配置处自行妥善保管。
+
+## 🛠️ 开发与构建
+
+仓库已提交构建产物 `lib/`（host ESM bundle + client bundle + typert 制品），安装后开箱即用。如需参与开发：
+
+```sh
+npm install          # 安装开发依赖
+npm run verify       # typecheck + build + 全量测试（14 文件 / 58 用例）
+npm run build        # 仅构建 lib/
+npm run gen:typert   # 重新生成客户端 remote 与 host typert 制品
+npm run install:profile  # 安装到默认 web profile（等价于 dsh plugin add）
+```
+
+- **host / client 分层**：`src/index.ts` 为 host 半入口（ShiningService 网关 + settings 注册 + 可选 QQ 会话层），`src/client/index.ts` 为 client 半入口（slot/settings/remote 挂载）。
+- **Remote 契约**：host 方法返回「裸业务值」，失败时抛出携带业务错误码的失败（由 Typert 网关统一包成 `{ ok, value }` / `{ ok: false, error }`），勿在插件里再包一层 `{ ok, value }`。
+- **视觉主题**：`src/client/visual.ts` 将主题色板写入 `--shining-*` CSS 变量，各组件在 `.module.css` 中消费。
 
 ## ⚠️ 注意事项
 
-- **QQ 接入**需在「超级助理」模式下配置 AppID/AppSecret，并安装天圆地方记忆依赖的 [@modusensus/dsh-mneme](https://github.com/modusensus/dsh-mneme) 插件（用于记忆检索，可选）。
+- **QQ 接入**需在「超级助理」模式下配置 AppID/AppSecret，并可选安装记忆依赖 [@modusensus/dsh-mneme](https://github.com/modusensus/dsh-mneme) 以启用记忆检索。
 - **记忆**的读侧依赖 dsh-mneme；若未安装，天圆地方仅使用自身记录的记忆。
-- 部分能力（如 QQ 富媒体消息、内嵌编辑器）仍在增强中，详见仓库文档。
+- 部分能力（如 QQ 富媒体消息、内嵌编辑器）仍在增强中，详见仓库 issue 与后续版本。
 
 ## 📄 许可证
 
