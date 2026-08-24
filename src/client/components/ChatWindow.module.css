@@ -19,7 +19,8 @@
   display: flex;
   flex-direction: column;
   border-radius: 16px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--shining-border, var(--dsw-alias-border-l2));
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--shining-glow, transparent);
   background-color: var(--dsw-alias-bg-overlay);
   background-size: cover;
   background-position: center;
@@ -30,8 +31,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  border-bottom: 1px solid var(--dsw-alias-border-l2);
-  background: color-mix(in srgb, var(--dsw-alias-bg-overlay) 80%, transparent);
+  border-bottom: 1px solid var(--shining-border, var(--dsw-alias-border-l2));
+  background: linear-gradient(to bottom, var(--shining-soft, transparent), transparent);
 }
 .title { margin: 0; font-size: 16px; }
 .tag { font-size: 12px; color: var(--dsw-alias-label-secondary); margin-left: 8px; }
@@ -60,15 +61,18 @@
   flex-direction: column;
   gap: 8px;
 }
-.user { align-self: flex-end; background: var(--shining-primary); color: #fff; padding: 6px 12px; border-radius: 12px; max-width: 70%; }
-.assistant { align-self: flex-start; background: var(--dsw-alias-bg-module-platform); padding: 6px 12px; border-radius: 12px; max-width: 70%; }
-.footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--dsw-alias-border-l2); background: color-mix(in srgb, var(--dsw-alias-bg-overlay) 80%, transparent); }
+.user { align-self: flex-end; background: var(--shining-gradient, var(--shining-primary)); color: #fff; padding: 6px 12px; border-radius: 12px; max-width: 70%; }
+.assistant { align-self: flex-start; background: color-mix(in srgb, var(--dsw-alias-bg-module-platform) 80%, var(--shining-soft, transparent)); padding: 6px 12px; border-radius: 12px; max-width: 70%; }
+.footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--shining-border, var(--dsw-alias-border-l2)); background: linear-gradient(to top, var(--shining-soft, transparent), transparent); }
 .input { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); }
-.send { padding: 8px 16px; border: 0; border-radius: 8px; background: var(--shining-primary); color: #fff; cursor: pointer; }
+.input:focus { border-color: var(--shining-primary); box-shadow: 0 0 0 2px var(--shining-glow); outline: none; }
+.send { padding: 8px 16px; border: 0; border-radius: 8px; background: var(--shining-gradient, var(--shining-primary)); color: #fff; cursor: pointer; }
+.send:disabled { opacity: 0.5; cursor: default; }
 .tabs { display: flex; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--dsw-alias-border-l2); background: color-mix(in srgb, var(--dsw-alias-bg-overlay) 80%, transparent); }
 .tab { padding: 6px 12px; border: 0; background: transparent; cursor: pointer; color: var(--dsw-alias-label-secondary); font: inherit; }
-.tabActive { padding: 6px 12px; border: 0; background: transparent; cursor: pointer; color: var(--shining-primary); font: inherit; font-weight: 600; border-bottom: 2px solid var(--shining-primary); }
-.delegate { padding: 8px 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: transparent; cursor: pointer; color: var(--dsw-alias-label-primary); }
+.tabActive { padding: 6px 12px; border: 0; background: var(--shining-soft, transparent); cursor: pointer; color: var(--shining-primary); font: inherit; font-weight: 600; border-bottom: 2px solid var(--shining-primary); border-radius: 6px 6px 0 0; }
+.delegate { padding: 8px 12px; border: 1px solid var(--shining-border, var(--dsw-alias-border-l2)); border-radius: 8px; background: transparent; cursor: pointer; color: var(--shining-primary); }
+.delegate:hover { background: var(--shining-soft); }
 .confirm { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.4); z-index: 1001; }
 .confirmBox { width: min(360px, 80vw); padding: 16px; border-radius: 12px; background: var(--dsw-alias-bg-module-platform); border: 1px solid var(--dsw-alias-border-l2); }
 .confirmActions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }

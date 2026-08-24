@@ -12,10 +12,11 @@
   text-align: left;
 }
 .entry:hover {
-  background: var(--dsw-alias-interactive-bg-hover);
+  background: var(--shining-soft, var(--dsw-alias-interactive-bg-hover));
 }
 .icon {
   flex: none;
+  color: var(--shining-accent);
 }
 .label {
   font-size: 13px;

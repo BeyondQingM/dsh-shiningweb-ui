@@ -19,13 +19,20 @@ describe('shining client store', () => {
 })
 
 describe('applyVisual', () => {
+  const VARS = ['--shining-primary', '--shining-accent', '--shining-gradient', '--shining-glow', '--shining-border', '--shining-soft', '--shining-blur']
   beforeEach(() => {
-    document.documentElement.style.removeProperty('--shining-primary')
+    for (const v of VARS) document.documentElement.style.removeProperty(v)
   })
-  it('writes theme color and blur CSS variables', () => {
+  it('writes the full theme palette + blur as CSS variables', () => {
     applyVisual({ visual: { themeColor: 'dawn-gold', glassBlur: 8 } } as never)
-    expect(document.documentElement.style.getPropertyValue('--shining-primary')).toBe('#e0a43b')
-    expect(document.documentElement.style.getPropertyValue('--shining-blur')).toBe('8px')
+    const st = document.documentElement.style
+    expect(st.getPropertyValue('--shining-primary')).toBe('#e0a43b')
+    expect(st.getPropertyValue('--shining-accent')).toBe('#f2c56b')
+    expect(st.getPropertyValue('--shining-gradient')).toBe('linear-gradient(135deg, #e0a43b 0%, #f2c56b 100%)')
+    expect(st.getPropertyValue('--shining-glow')).toBe('rgba(224, 164, 59, 0.35)')
+    expect(st.getPropertyValue('--shining-border')).toBe('rgba(224, 164, 59, 0.35)')
+    expect(st.getPropertyValue('--shining-soft')).toBe('rgba(224, 164, 59, 0.10)')
+    expect(st.getPropertyValue('--shining-blur')).toBe('8px')
   })
 })
 
