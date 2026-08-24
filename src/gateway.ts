@@ -7,16 +7,21 @@ import { dirname, join } from 'node:path'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { Context, Service } from '@deepseek-ai/cordis'
+import { settingsNamespace } from '@deepseek-ai/dsh-settings'
 import s from '@deepseek-ai/schemastery'
-import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
+import { Remote, TypertLookupFailure, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type {
   ChatRequest, ChatValue, FsEntry, FsListRequest, FsListValue, FsOpValue, FsPathRequest,
   FsReadRequest, FsReadValue, FsRenameRequest, FsWriteRequest, GitBranchRequest,
   GitChange, GitCreateBranchRequest, GitOpValue, GitPathRequest, GitStatusRequest,
   GitStatusValue, QqListRequest, QqListValue, QqReadRequest, QqReadValue, QqSendRequest,
-  QqSendValue, QqSessionView, ShiningResult,
+  QqSendValue, QqSessionView,
 } from './types.ts'
 import { failure, resolveWithinRoot, success } from './types.ts'
+import { DEFAULT_SHINING_SETTINGS, SETTINGS_NAMESPACE } from './settings.ts'
+import type { ShiningSettings } from './settings.ts'
+import { ShiningSettingsSchema } from './settings-schema.ts'
+import { createQqAdapter, createQqModelCall, ShiningQqService } from './qq.ts'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
@@ -30,7 +35,8 @@ const execFileAsync = promisify(execFile)
 /** 在 repo 目录执行 git 命令。 */
 async function gitResult(repo: string, args: string[]): Promise<string> {
   const { stdout } = await execFileAsync('git', ['-C', repo, ...args], { timeout: 30000 })
-  return stdout.trim()
+  // Preserve leading spaces: porcelain status uses the first two columns as data.
+  return stdout.replace(/\r?\n$/, '')
 }
 
 export interface Config {}
@@ -49,10 +55,35 @@ export class ShiningService extends TypertRemoteService {
 
   constructor(ctx: Context, _config: Config) {
     super(ctx, 'shining')
+    ctx.inject(['settings'], (settingsCtx) => {
+      try {
+        settingsCtx.settings.register(settingsNamespace(SETTINGS_NAMESPACE), ShiningSettingsSchema)
+      } catch (error) {
+        console.error('[shining:host] settings namespace registration failed', {
+          namespace: SETTINGS_NAMESPACE,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return
+      }
+      const readSettings = (): ShiningSettings =>
+        (settingsCtx.settings.get(settingsNamespace(SETTINGS_NAMESPACE)) as ShiningSettings | undefined) ?? DEFAULT_SHINING_SETTINGS
+      void (async () => {
+        const settings = readSettings()
+        if (!settings.qq?.enabled || !settings.qq.appId || !settings.qq.appSecret) return
+        try {
+          const adapter = await createQqAdapter(settings.qq.appId, settings.qq.appSecret)
+          const svc = new ShiningQqService(adapter, createQqModelCall(), readSettings)
+          ctx.provide('shiningQq', svc)
+          ctx.effect(() => () => svc.dispose(), 'shining: qq lifecycle')
+        } catch (error) {
+          console.error('[shining:host] QQ service failed to start', { error: error instanceof Error ? error.message : String(error) })
+        }
+      })()
+    })
   }
 
   @Remote('fsList')
-  async fsList(request: FsListRequest): Promise<ShiningResult<FsListValue>> {
+  async fsList(request: FsListRequest): Promise<FsListValue> {
     try {
       const dir = resolveWithinRoot(request.root, request.path)
       const entries = await fs.readdir(dir, { withFileTypes: true })
@@ -71,7 +102,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('fsRead')
-  async fsRead(request: FsReadRequest): Promise<ShiningResult<FsReadValue>> {
+  async fsRead(request: FsReadRequest): Promise<FsReadValue> {
     try {
       const file = resolveWithinRoot(request.root, request.path)
       return success({ content: await fs.readFile(file, 'utf8') })
@@ -81,7 +112,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('fsWrite')
-  async fsWrite(request: FsWriteRequest): Promise<ShiningResult<FsOpValue>> {
+  async fsWrite(request: FsWriteRequest): Promise<FsOpValue> {
     try {
       const file = resolveWithinRoot(request.root, request.path)
       await fs.writeFile(file, request.content, 'utf8')
@@ -92,7 +123,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('fsCreateFile')
-  async fsCreateFile(request: FsPathRequest): Promise<ShiningResult<FsOpValue>> {
+  async fsCreateFile(request: FsPathRequest): Promise<FsOpValue> {
     try {
       const file = resolveWithinRoot(request.root, request.path)
       await fs.writeFile(file, '', { flag: 'wx' })
@@ -103,7 +134,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('fsCreateDir')
-  async fsCreateDir(request: FsPathRequest): Promise<ShiningResult<FsOpValue>> {
+  async fsCreateDir(request: FsPathRequest): Promise<FsOpValue> {
     try {
       const dir = resolveWithinRoot(request.root, request.path)
       await fs.mkdir(dir, { recursive: false })
@@ -114,7 +145,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('fsRename')
-  async fsRename(request: FsRenameRequest): Promise<ShiningResult<FsOpValue>> {
+  async fsRename(request: FsRenameRequest): Promise<FsOpValue> {
     try {
       const target = resolveWithinRoot(request.root, request.path)
       const next = resolveWithinRoot(request.root, join(dirname(target), request.newName))
@@ -126,7 +157,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('fsDelete')
-  async fsDelete(request: FsPathRequest): Promise<ShiningResult<FsOpValue>> {
+  async fsDelete(request: FsPathRequest): Promise<FsOpValue> {
     try {
       const target = resolveWithinRoot(request.root, request.path)
       await fs.rm(target, { recursive: true, force: false })
@@ -137,16 +168,19 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('gitStatus')
-  async gitStatus(request: GitStatusRequest): Promise<ShiningResult<GitStatusValue>> {
+  async gitStatus(request: GitStatusRequest): Promise<GitStatusValue> {
     try {
       const repo = resolveWithinRoot(request.root, request.repoPath)
       const branch = await gitResult(repo, ['branch', '--show-current'])
       const porcelain = await gitResult(repo, ['status', '--porcelain'])
       const lines = porcelain === '' ? [] : porcelain.split('\n')
-      const changes: GitChange[] = lines.map((line) => ({
-        path: line.slice(3),
-        status: (line[0] === '?' ? 'U' : line[0]) as GitChange['status'],
-      }))
+      const changes: GitChange[] = lines.map((line) => {
+        const indexStatus = line[0] !== ' ' ? line[0] : line[1] !== ' ' ? line[1] : 'M'
+        return {
+          path: line.slice(3),
+          status: (indexStatus === '?' ? 'U' : indexStatus) as GitChange['status'],
+        }
+      })
       return success({ branch, dirtyCount: lines.length, changes })
     } catch (error) {
       return failure('git-error', error instanceof Error ? error.message : String(error))
@@ -154,7 +188,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('gitCheckout')
-  async gitCheckout(request: GitBranchRequest): Promise<ShiningResult<GitOpValue>> {
+  async gitCheckout(request: GitBranchRequest): Promise<GitOpValue> {
     try {
       const repo = resolveWithinRoot(request.root, request.repoPath)
       return success({ output: await gitResult(repo, ['checkout', request.branch]) })
@@ -164,7 +198,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('gitCreateBranch')
-  async gitCreateBranch(request: GitCreateBranchRequest): Promise<ShiningResult<GitOpValue>> {
+  async gitCreateBranch(request: GitCreateBranchRequest): Promise<GitOpValue> {
     try {
       const repo = resolveWithinRoot(request.root, request.repoPath)
       return success({ output: await gitResult(repo, ['checkout', '-b', request.name]) })
@@ -174,7 +208,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('gitPull')
-  async gitPull(request: GitPathRequest): Promise<ShiningResult<GitOpValue>> {
+  async gitPull(request: GitPathRequest): Promise<GitOpValue> {
     try {
       const repo = resolveWithinRoot(request.root, request.repoPath)
       return success({ output: await gitResult(repo, ['pull']) })
@@ -184,7 +218,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('chat')
-  async chat(request: ChatRequest): Promise<ShiningResult<ChatValue>> {
+  async chat(request: ChatRequest): Promise<ChatValue> {
     try {
       const response = await fetch(`${request.apiBase.replace(/\/$/, '')}/chat/completions`, {
         method: 'POST',
@@ -196,12 +230,13 @@ export class ShiningService extends TypertRemoteService {
       const data = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
       return success({ content: data.choices?.[0]?.message?.content ?? '' })
     } catch (error) {
+      if (error instanceof TypertLookupFailure) throw error
       return failure('chat-error', error instanceof Error ? error.message : String(error))
     }
   }
 
   @Remote('qqList')
-  async qqList(_request: QqListRequest): Promise<ShiningResult<QqListValue>> {
+  async qqList(_request: QqListRequest): Promise<QqListValue> {
     try {
       const svc = this.ctx.shiningQq
       const sessions: QqSessionView[] = (svc?.list() ?? []).map((s) => ({ key: s.key, peerId: s.peerId, kind: s.kind, messages: s.messages, updatedAt: s.updatedAt }))
@@ -212,7 +247,7 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('qqRead')
-  async qqRead(request: QqReadRequest): Promise<ShiningResult<QqReadValue>> {
+  async qqRead(request: QqReadRequest): Promise<QqReadValue> {
     try {
       const svc = this.ctx.shiningQq
       const s = svc?.read(request.key)
@@ -223,13 +258,14 @@ export class ShiningService extends TypertRemoteService {
   }
 
   @Remote('qqSend')
-  async qqSend(request: QqSendRequest): Promise<ShiningResult<QqSendValue>> {
+  async qqSend(request: QqSendRequest): Promise<QqSendValue> {
     try {
       const svc = this.ctx.shiningQq
       if (!svc) return failure('qq-error', 'qq service not enabled')
       await svc.sendTo(request.key, request.content)
       return success({ ok: true })
     } catch (error) {
+      if (error instanceof TypertLookupFailure) throw error
       return failure('qq-error', error instanceof Error ? error.message : String(error))
     }
   }

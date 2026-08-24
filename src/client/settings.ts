@@ -8,6 +8,22 @@ export type { ShiningSettings }
 
 let scope: SettingsScope<ShiningSettings> | null = null
 
+export interface SettingsDebugSnapshot {
+  bound: boolean
+  status?: 'loading' | 'ready' | 'unavailable'
+  writable?: boolean
+  mode?: 'host' | 'memory'
+  revision?: number
+  hasValue?: boolean
+}
+
+/** 仅供排障：暴露 transport 元数据，绝不暴露设置值或凭据。 */
+export function getSettingsDebugSnapshot(): SettingsDebugSnapshot {
+  if (!scope) return { bound: false }
+  const { status, writable, mode, revision, value } = scope.getSnapshot()
+  return { bound: true, status, writable, mode, revision, hasValue: value !== undefined }
+}
+
 /** apply 时绑定 settingsScope。 */
 export function bindSettingsScope(s: SettingsScope<ShiningSettings>): void {
   scope = s

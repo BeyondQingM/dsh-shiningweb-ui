@@ -17,7 +17,7 @@ import { applyVisual } from './visual.ts'
 import TYPERT_REMOTE from './remote.ts'
 import { setShiningRemote, type ShiningRemote } from './remote-types.ts'
 import { bindDshCtx } from './dsh-context.ts'
-import { setWorkspaceRoot, setOpenPath } from './workspace.ts'
+import { resolveCurrentWorkspaceRoot, setWorkspaceRoot, setOpenPath } from './workspace.ts'
 import { ChatEntry, FilesEntry } from './components/SidebarEntry.tsx'
 import { ChatWindow } from './components/ChatWindow.tsx'
 import { FileExplorer } from './components/FileExplorer.tsx'
@@ -56,8 +56,11 @@ export async function apply(ctx: ClientContext): Promise<void> {
   ctx.effect(() => scope.subscribe(() => applyVisual(scope.getSnapshot().value)), 'shining: visual subscription')
   applyVisual(scope.getSnapshot().value)
 
-  // 工作区根路径与打开文件回调（v0.1 单工作区假设，订阅 workspaces 列表）。
-  const syncRoot = () => setWorkspaceRoot(ctx.workspaces.list.getSnapshot().items[0]?.path ?? '')
+  // 工作区根路径与打开文件回调（订阅 workspaces 列表，按最近活跃工作区解析）。
+  const syncRoot = () => {
+    const snapshot = ctx.workspaces.list.getSnapshot()
+    setWorkspaceRoot(resolveCurrentWorkspaceRoot(snapshot))
+  }
   syncRoot()
   ctx.effect(() => ctx.workspaces.list.subscribe(syncRoot), 'shining: workspace root')
   setOpenPath((path) => void ctx.workspaces.openPath(path))

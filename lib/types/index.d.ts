@@ -7,5 +7,5 @@ import type { Context } from '@deepseek-ai/cordis';
 import { ShiningService } from './gateway.ts';
 export { ShiningService } from './gateway.ts';
 export default ShiningService;
-/** Host plugin body：提供网关 + 注册 settings 命名空间 + 可选 QQ 会话层。 */
+/** Compatibility entry for hosts that load the module as a Cordis plugin. */
 export declare function apply(ctx: Context): void;

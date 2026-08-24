@@ -6,9 +6,11 @@
 export const NAMESPACE = 'shining'
 export const PACKAGE = 'dsh-shiningweb-ui'
 
-/** 构建 ShiningResult 联合的 zod 源码字符串。 */
-const shiningResult = (valueSchema) =>
-  `z.union([z.object({ ok: z.literal(true), value: ${valueSchema} }), z.object({ ok: z.literal(false), error: z.object({ code: z.string(), message: z.string() }) })])`
+/**
+ * 结果 schema = 裸业务值。{ ok, value } / { ok: false, error } 包装由 Typert 网关统一完成，
+ * 插件侧不应再包一层（否则客户端收到双重包裹，value 里没有业务字段）。
+ */
+const shiningResult = (valueSchema) => valueSchema
 
 const rootPath = 'z.object({ root: z.string(), path: z.string() })'
 const rootRepo = 'z.object({ root: z.string(), repoPath: z.string() })'

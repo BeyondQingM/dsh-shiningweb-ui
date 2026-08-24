@@ -1,6 +1,6 @@
 {
   "name": "dsh-shiningweb-ui",
-  "version": "0.1.0",
+  "version": "0.1.0-rc4",
   "description": "璀璨星河：独立聊天、文件栏、Git 分支管理、视觉增强的 DSH 插件",
   "type": "module",
   "main": "lib/index.js",

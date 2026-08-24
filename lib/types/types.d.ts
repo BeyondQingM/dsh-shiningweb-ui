@@ -1,20 +1,7 @@
-export interface ShiningSuccess<T> {
-    ok: true;
-    value: T;
-}
-export interface ShiningFailure {
-    ok: false;
-    error: {
-        code: string;
-        message: string;
-        [k: string]: unknown;
-    };
-}
-export type ShiningResult<T> = ShiningSuccess<T> | ShiningFailure;
-/** 成功分支。 */
-export declare function success<T>(value: T): ShiningSuccess<T>;
-/** 失败分支。 */
-export declare function failure(code: string, message: string, extra?: Record<string, unknown>): ShiningFailure;
+/** 成功：直接返回裸业务值（网关统一包成 { ok: true, value }）。 */
+export declare function success<T>(value: T): T;
+/** 失败：抛出携带业务错误码的失败（网关统一包成 { ok: false, error }）。 */
+export declare function failure(code: string, message: string): never;
 /** 将客户端路径解析为绝对路径，并强制位于 root 之内（防目录穿越）。 */
 export declare function resolveWithinRoot(root: string, path: string): string;
 export interface FsListRequest {

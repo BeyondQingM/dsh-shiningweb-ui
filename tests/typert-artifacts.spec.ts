@@ -19,10 +19,10 @@ describe('typert artifacts', () => {
     }
   })
 
-  it('fsList result schema validates a success branch', () => {
+  it('fsList result schema validates the raw business value (no wrapper)', () => {
     const d = TYPERT_REMOTE.descriptors.find((x) => x.method === 'fsList')
     expect(d).toBeDefined()
-    const parsed = d!.result.schema.parse({ ok: true, value: { entries: [{ name: 'a', isDirectory: false, size: 1 }] } })
-    expect(parsed).toMatchObject({ ok: true })
+    const parsed = d!.result.schema.parse({ entries: [{ name: 'a', isDirectory: false, size: 1 }] })
+    expect(parsed).toMatchObject({ entries: [{ name: 'a', isDirectory: false, size: 1 }] })
   })
 })

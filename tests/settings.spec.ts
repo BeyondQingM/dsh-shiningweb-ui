@@ -1,6 +1,22 @@
 import { describe, it, expect } from 'vitest'
 import { ShiningSettingsSchema } from '../src/settings-schema.ts'
 import { DEFAULT_SHINING_SETTINGS } from '../src/settings.ts'
+import { bindSettingsScope, getSettingsDebugSnapshot } from '../src/client/settings.ts'
+
+describe('settings diagnostics', () => {
+  it('reports the live scope transport state without exposing values', () => {
+    bindSettingsScope({
+      getSnapshot: () => ({
+        status: 'ready', value: { apiKey: 'secret' }, base: {}, user: {}, revision: 7, writable: true, mode: 'host',
+      }),
+      subscribe: () => () => {}, set: async () => {}, unset: async () => {},
+    } as never)
+
+    expect(getSettingsDebugSnapshot()).toEqual({
+      bound: true, status: 'ready', writable: true, mode: 'host', revision: 7, hasValue: true,
+    })
+  })
+})
 
 describe('ShiningSettingsSchema', () => {
   it('applies defaults when no section is supplied', () => {

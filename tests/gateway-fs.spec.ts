@@ -6,9 +6,10 @@ import { ShiningService } from '../src/gateway.ts'
 
 /** 构造一个不带真实 ctx 的网关实例用于单测（fs 方法不触碰 ctx）。 */
 function makeService(): ShiningService {
-  return new ShiningService({ reflect: { provide: () => {} } } as never, {})
+  return new ShiningService({ inject: () => {}, reflect: { provide: () => {} } } as never, {})
 }
 
+// 契约：host 方法返回“裸业务值”（无 { ok, value } 包裹），失败时抛错。
 describe('ShiningService.fs', () => {
   let root: string
   beforeAll(async () => { root = await mkdtemp(join(tmpdir(), 'shining-')) })
@@ -18,39 +19,35 @@ describe('ShiningService.fs', () => {
     const svc = makeService()
     await writeFile(join(root, 'a.txt'), 'hello', 'utf8')
     const list = await svc.fsList({ root, path: '.' })
-    expect(list.ok).toBe(true)
-    if (list.ok) expect(list.value.entries.some((e) => e.name === 'a.txt')).toBe(true)
+    expect(list.entries.some((e) => e.name === 'a.txt')).toBe(true)
 
     const read = await svc.fsRead({ root, path: 'a.txt' })
-    expect(read).toEqual({ ok: true, value: { content: 'hello' } })
+    expect(read).toEqual({ content: 'hello' })
 
     const write = await svc.fsWrite({ root, path: 'b.txt', content: 'world' })
-    expect(write.ok).toBe(true)
+    expect(write.path.endsWith('b.txt')).toBe(true)
 
     const mk = await svc.fsCreateDir({ root, path: 'sub' })
-    expect(mk.ok).toBe(true)
+    expect(mk.path.endsWith('sub')).toBe(true)
 
     const ren = await svc.fsRename({ root, path: 'a.txt', newName: 'c.txt' })
-    expect(ren.ok).toBe(true)
-    if (ren.ok) expect(ren.value.path.endsWith('c.txt')).toBe(true)
+    expect(ren.path.endsWith('c.txt')).toBe(true)
 
     const del = await svc.fsDelete({ root, path: 'b.txt' })
-    expect(del.ok).toBe(true)
+    expect(del.path.endsWith('b.txt')).toBe(true)
   })
 
-  it('rejects a path escaping the root', async () => {
+  it('throws on a path escaping the root', async () => {
     const svc = makeService()
-    const res = await svc.fsRead({ root, path: '../secret.txt' })
-    expect(res).toMatchObject({ ok: false, error: { code: 'fs-error' } })
+    await expect(svc.fsRead({ root, path: '../secret.txt' })).rejects.toThrow()
   })
 
   it('honors showHidden for dotfiles', async () => {
     const svc = makeService()
     await writeFile(join(root, '.hidden'), 'x', 'utf8')
     const shown = await svc.fsList({ root, path: '.', showHidden: true })
-    expect(shown).toMatchObject({ ok: true })
-    if (shown.ok) expect(shown.value.entries.some((e) => e.name === '.hidden')).toBe(true)
+    expect(shown.entries.some((e) => e.name === '.hidden')).toBe(true)
     const hidden = await svc.fsList({ root, path: '.' })
-    if (hidden.ok) expect(hidden.value.entries.some((e) => e.name === '.hidden')).toBe(false)
+    expect(hidden.entries.some((e) => e.name === '.hidden')).toBe(false)
   })
 })

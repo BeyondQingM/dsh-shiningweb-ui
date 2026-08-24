@@ -1,6 +1,16 @@
 import type { SettingsScope } from '@deepseek-ai/dsh-client-runtime/client';
 import type { ShiningSettings } from '../settings.ts';
 export type { ShiningSettings };
+export interface SettingsDebugSnapshot {
+    bound: boolean;
+    status?: 'loading' | 'ready' | 'unavailable';
+    writable?: boolean;
+    mode?: 'host' | 'memory';
+    revision?: number;
+    hasValue?: boolean;
+}
+/** 仅供排障：暴露 transport 元数据，绝不暴露设置值或凭据。 */
+export declare function getSettingsDebugSnapshot(): SettingsDebugSnapshot;
 /** apply 时绑定 settingsScope。 */
 export declare function bindSettingsScope(s: SettingsScope<ShiningSettings>): void;
 /**
