@@ -7,6 +7,7 @@ import { useShiningStore, closeChat } from '../store.ts'
 import { useChat } from '../hooks/useChat.ts'
 import { FriendCircle } from './FriendCircle.tsx'
 import { QqSessions } from './QqSessions.tsx'
+import { Scene } from './Scene.tsx'
 import { useDshContext, dshContextToText, sendToSession, getCurrentSessionId } from '../dsh-context.ts'
 import { readMemoryContext } from '../memory.ts'
 import { useShiningRemote } from '../remote-types.ts'
@@ -56,7 +57,8 @@ export function ChatWindow(_props: Props): React.ReactNode {
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-label={dict.zh.chatTitle}>
       <div className={styles.backdrop} onClick={closeChat} />
-      <section className={styles.panel} style={{ backdropFilter: `blur(var(--shining-blur))`, backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined }}>
+      <section className={styles.panel} style={{ backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined }}>
+        <Scene themeColor={settings.visual.themeColor} />
         <header className={styles.header}>
           <div>
             <h2 className={styles.title}>{dict.zh.chatTitle}</h2>

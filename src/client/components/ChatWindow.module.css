@@ -21,42 +21,18 @@
   border-radius: 16px;
   border: 1px solid var(--shining-border, var(--dsw-alias-border-l2));
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--shining-glow, transparent);
-  background-color: var(--dsw-alias-bg-overlay);
+  /* 真玻璃：半透明面板 + backdrop 磨砂，背景内容透出并被模糊。 */
+  background-color: color-mix(in srgb, var(--dsw-alias-bg-overlay) 55%, transparent);
   background-size: cover;
   background-position: center;
   overflow: hidden;
+  -webkit-backdrop-filter: blur(var(--shining-blur, 12px)) saturate(1.25);
+  backdrop-filter: blur(var(--shining-blur, 12px)) saturate(1.25);
 }
-/* 星野层：纯 CSS radial-gradient 星点 + 主题色辉光晕染；
-   位于壁纸之下、内容之上（内容均 position:relative 提升层级）。 */
-.panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(1px 1px at 12% 18%, rgba(255, 255, 255, 0.9) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 34% 62%, rgba(255, 255, 255, 0.55) 50%, transparent 51%),
-    radial-gradient(1px 1px at 58% 12%, rgba(255, 255, 255, 0.7) 50%, transparent 51%),
-    radial-gradient(2px 2px at 76% 40%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
-    radial-gradient(1px 1px at 88% 74%, rgba(255, 255, 255, 0.65) 50%, transparent 51%),
-    radial-gradient(1.2px 1.2px at 22% 84%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
-    radial-gradient(1px 1px at 46% 38%, rgba(255, 255, 255, 0.75) 50%, transparent 51%),
-    radial-gradient(1.4px 1.4px at 66% 88%, rgba(255, 255, 255, 0.45) 50%, transparent 51%),
-    radial-gradient(circle at 82% 10%, var(--shining-glow, transparent) 0%, transparent 42%),
-    radial-gradient(circle at 8% 92%, var(--shining-soft, transparent) 0%, transparent 38%);
-  opacity: 0.85;
-}
-/* 浅色模式下星点不可见，仅保留主题色晕染，避免脏点。 */
-:global(body:not([data-ds-dark-theme])) .panel::before {
-  opacity: 0.5;
-  background-image:
-    radial-gradient(circle at 82% 10%, var(--shining-glow, transparent) 0%, transparent 42%),
-    radial-gradient(circle at 8% 92%, var(--shining-soft, transparent) 0%, transparent 38%),
-    linear-gradient(160deg, var(--shining-soft, transparent), transparent 45%);
-}
-/* 用户设置壁纸时壁纸在 panel 背景层，星野叠在其上但极淡，不抢主体。 */
-.panel > * {
+/* 内容层提升到场景层之上（Scene 为 z-index 0）。 */
+.panel > :not([data-shining-scene]) {
   position: relative;
+  z-index: 1;
 }
 .header {
   display: flex;
@@ -64,7 +40,9 @@
   align-items: center;
   padding: 14px 16px;
   border-bottom: 1px solid var(--shining-border, var(--dsw-alias-border-l2));
-  background: linear-gradient(to bottom, var(--shining-soft, transparent), transparent);
+  background: color-mix(in srgb, var(--dsw-alias-bg-overlay) 38%, transparent);
+  -webkit-backdrop-filter: blur(var(--shining-blur, 12px));
+  backdrop-filter: blur(var(--shining-blur, 12px));
 }
 .title { margin: 0; font-size: 16px; }
 .tag { font-size: 12px; color: var(--dsw-alias-label-secondary); margin-left: 8px; }
@@ -94,18 +72,18 @@
   gap: 8px;
 }
 .user { align-self: flex-end; background: var(--shining-gradient, var(--shining-primary)); color: #fff; padding: 6px 12px; border-radius: 12px; max-width: 70%; }
-.assistant { align-self: flex-start; background: color-mix(in srgb, var(--dsw-alias-bg-module-platform) 80%, var(--shining-soft, transparent)); padding: 6px 12px; border-radius: 12px; max-width: 70%; }
-.footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--shining-border, var(--dsw-alias-border-l2)); background: linear-gradient(to top, var(--shining-soft, transparent), transparent); }
-.input { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); }
+.assistant { align-self: flex-start; background: color-mix(in srgb, var(--dsw-alias-bg-module-platform) 72%, var(--shining-soft, transparent)); padding: 6px 12px; border-radius: 12px; max-width: 70%; }
+.footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--shining-border, var(--dsw-alias-border-l2)); background: color-mix(in srgb, var(--dsw-alias-bg-overlay) 38%, transparent); -webkit-backdrop-filter: blur(var(--shining-blur, 12px)); backdrop-filter: blur(var(--shining-blur, 12px)); }
+.input { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l2); background: color-mix(in srgb, var(--dsw-alias-bg-base) 82%, transparent); color: var(--dsw-alias-label-primary); }
 .input:focus { border-color: var(--shining-primary); box-shadow: 0 0 0 2px var(--shining-glow); outline: none; }
 .send { padding: 8px 16px; border: 0; border-radius: 8px; background: var(--shining-gradient, var(--shining-primary)); color: #fff; cursor: pointer; }
 .send:disabled { opacity: 0.5; cursor: default; }
-.tabs { display: flex; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--dsw-alias-border-l2); background: color-mix(in srgb, var(--dsw-alias-bg-overlay) 80%, transparent); }
+.tabs { display: flex; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--dsw-alias-border-l2); background: color-mix(in srgb, var(--dsw-alias-bg-overlay) 38%, transparent); -webkit-backdrop-filter: blur(var(--shining-blur, 12px)); backdrop-filter: blur(var(--shining-blur, 12px)); }
 .tab { padding: 6px 12px; border: 0; background: transparent; cursor: pointer; color: var(--dsw-alias-label-secondary); font: inherit; }
 .tabActive { padding: 6px 12px; border: 0; background: var(--shining-soft, transparent); cursor: pointer; color: var(--shining-primary); font: inherit; font-weight: 600; border-bottom: 2px solid var(--shining-primary); border-radius: 6px 6px 0 0; }
-.delegate { padding: 8px 12px; border: 1px solid var(--shining-border, var(--dsw-alias-border-l2)); border-radius: 8px; background: transparent; cursor: pointer; color: var(--shining-primary); }
+.delegate { padding: 8px 12px; border: 1px solid var(--shining-border, var(--dsw-alias-border-l2)); border-radius: 8px; background: color-mix(in srgb, var(--dsw-alias-bg-overlay) 45%, transparent); cursor: pointer; color: var(--shining-primary); }
 .delegate:hover { background: var(--shining-soft); }
 .confirm { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.4); z-index: 1001; }
-.confirmBox { width: min(360px, 80vw); padding: 16px; border-radius: 12px; background: var(--dsw-alias-bg-module-platform); border: 1px solid var(--dsw-alias-border-l2); }
+.confirmBox { width: min(360px, 80vw); padding: 16px; border-radius: 12px; background: color-mix(in srgb, var(--dsw-alias-bg-module-platform) 82%, transparent); border: 1px solid var(--dsw-alias-border-l2); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .confirmActions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
 .confirmActions button { padding: 6px 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 6px; background: transparent; cursor: pointer; color: var(--dsw-alias-label-primary); }

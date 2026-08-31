@@ -1,0 +1,177 @@
+/* 场景层：动画与配色参考「星辰跃动」官网（XingChenYueDong.html）。 */
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* —— 星星 —— */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffffff;
+  opacity: 0.5;
+  animation: twinkle var(--dur, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 0.95; transform: scale(1.15); }
+}
+
+/* —— 流星（reduced-motion 下由组件侧不渲染） —— */
+.meteor {
+  position: absolute;
+  left: -70px;
+  top: var(--my, 20%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px 2px rgba(150, 200, 255, 0.55);
+  opacity: 0;
+  animation: meteorFly var(--mdur, 9s) linear infinite;
+  animation-delay: var(--mdelay, 0s);
+}
+.meteor::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 100px;
+  height: 2px;
+  transform-origin: right center;
+  transform: translateY(-50%) rotate(6deg);
+  border-radius: 2px;
+  background: linear-gradient(to left, rgba(160, 200, 255, 0.9), rgba(160, 200, 255, 0.2), transparent);
+}
+@keyframes meteorFly {
+  0% { opacity: 0; transform: translate(0, 0); }
+  4% { opacity: 1; }
+  14% { opacity: 1; }
+  20% { opacity: 0; transform: translate(128vw, 0); }
+  100% { opacity: 0; transform: translate(128vw, 0); }
+}
+
+/* —— 星云光斑（墨水晕染，screen 混合） —— */
+.nebula1,
+.nebula2 {
+  position: absolute;
+  border-radius: 42% 58% 60% 40% / 45% 45% 55% 55%;
+  filter: blur(60px);
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  will-change: transform, border-radius;
+  animation: inkFlow 30s ease-in-out infinite alternate;
+}
+.nebula1 {
+  width: 52vmax;
+  height: 52vmax;
+  left: -16%;
+  top: -18%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.5), transparent 66%);
+}
+.nebula2 {
+  width: 46vmax;
+  height: 46vmax;
+  right: -14%;
+  bottom: -16%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.42), transparent 66%);
+  animation-duration: 38s;
+  animation-direction: alternate-reverse;
+}
+@keyframes inkFlow {
+  0% { transform: translate(0, 0) scale(1); border-radius: 42% 58% 60% 40% / 45% 45% 55% 55%; }
+  50% { transform: translate(12vmax, 8vmax) scale(1.3); border-radius: 58% 42% 38% 62% / 55% 60% 40% 45%; }
+  100% { transform: translate(5vmax, -6vmax) scale(0.94); border-radius: 48% 52% 55% 45% / 50% 42% 58% 50%; }
+}
+
+/* —— 极光带（极光紫专属） —— */
+.aurora {
+  position: absolute;
+  left: -15%;
+  right: -15%;
+  top: 16%;
+  height: 36%;
+  opacity: 0;
+  transform: rotate(-6deg);
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(154, 107, 255, 0.28) 35%,
+    rgba(192, 132, 252, 0.2) 55%,
+    rgba(122, 160, 255, 0.12) 75%,
+    transparent 100%);
+  filter: blur(16px);
+  mix-blend-mode: screen;
+}
+[data-shining-scene='aurora-purple'] .aurora {
+  opacity: 0.9;
+  animation: auroraDrift 18s ease-in-out infinite alternate;
+}
+@keyframes auroraDrift {
+  0% { transform: translateX(-4%) rotate(-6deg) scaleY(1); }
+  100% { transform: translateX(4%) rotate(-4deg) scaleY(1.08); }
+}
+
+/* —— 烈阳（浅色晨曦金场景；多层光晕呼吸） —— */
+.sun {
+  position: absolute;
+  top: -46px;
+  right: -30px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%,
+    #ffffff 0%, #fffbe8 15%, #fff3c4 28%, #ffe88f 40%, #ffd970 50%,
+    rgba(255, 176, 72, 0.5) 60%, rgba(255, 156, 62, 0.26) 72%,
+    rgba(255, 144, 56, 0.11) 84%, rgba(255, 134, 52, 0.04) 94%, transparent 100%);
+  box-shadow:
+    0 0 40px 18px rgba(255, 230, 150, 0.45),
+    0 0 120px 60px rgba(255, 205, 105, 0.22),
+    0 0 260px 140px rgba(255, 190, 90, 0.12);
+  animation: sunBreathe 8s ease-in-out infinite;
+}
+@keyframes sunBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+/* ============ 主题 × 明暗场景 ============ */
+
+/* —— 深色：各主题默认星野 —— */
+[data-shining-scene='galaxy-blue'] .nebula1,
+[data-shining-scene='galaxy-blue'] .nebula2 { opacity: 0.6; }
+[data-shining-scene='dawn-gold'] .star { background: #ffe9c4; box-shadow: 0 0 6px rgba(255, 214, 150, 0.6); }
+[data-shining-scene='dawn-gold'] .nebula1 { background: radial-gradient(circle, rgba(224, 164, 59, 0.42), transparent 66%); }
+[data-shining-scene='dawn-gold'] .nebula2 { background: radial-gradient(circle, rgba(242, 197, 107, 0.34), transparent 66%); }
+[data-shining-scene='aurora-purple'] .star { background: #efe4ff; }
+[data-shining-scene='aurora-purple'] .nebula1 { background: radial-gradient(circle, rgba(154, 107, 255, 0.5), transparent 66%); }
+[data-shining-scene='aurora-purple'] .nebula2 { background: radial-gradient(circle, rgba(56, 130, 246, 0.4), transparent 66%); }
+
+/* —— 浅色（白昼）：星星变微尘、隐藏流星、星云转柔和光晕、晨曦金显示烈阳 —— */
+:global(body:not([data-ds-dark-theme])) .star {
+  opacity: 0.16;
+  animation: none;
+  background: currentColor;
+  color: var(--shining-accent, #7aa0ff);
+}
+:global(body:not([data-ds-dark-theme])) .meteor { display: none; }
+:global(body:not([data-ds-dark-theme])) .nebula1,
+:global(body:not([data-ds-dark-theme])) .nebula2 {
+  mix-blend-mode: normal;
+  opacity: 0.16;
+  animation: none;
+}
+:global(body:not([data-ds-dark-theme])) .aurora { opacity: 0.3; animation: none; }
+:global(body:not([data-ds-dark-theme])) [data-shining-scene='dawn-gold'] .sun { opacity: 1; }
+
+/* —— reduced-motion：所有装饰动画静止，保留静态画面 —— */
+@media (prefers-reduced-motion: reduce) {
+  .star, .nebula1, .nebula2, .aurora, .sun { animation: none; }
+  .meteor { display: none; }
+}
