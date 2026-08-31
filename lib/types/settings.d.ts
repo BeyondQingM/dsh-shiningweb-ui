@@ -4,7 +4,8 @@
  * client bundle 会打包它，而 client 只需类型+默认值，不需要 schema。
  */
 export declare const SETTINGS_NAMESPACE = "shining";
-export type ThemeColor = 'galaxy-blue' | 'dawn-gold' | 'aurora-purple';
+/** 主题色：follow = 跟随 DSH（不覆盖官方 token，还原原生观感）。 */
+export type ThemeColor = 'follow' | 'galaxy-blue' | 'dawn-gold' | 'aurora-purple';
 export type GitAutoRefresh = 'off' | '10s' | '30s' | '1m';
 /** 分级能力模式：pet（默认）/ assistant / super。 */
 export type CapabilityMode = 'pet' | 'assistant' | 'super';

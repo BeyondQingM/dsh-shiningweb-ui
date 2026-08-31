@@ -14,6 +14,7 @@ import { SETTINGS_NAMESPACE } from '../settings.ts'
 import { dict, NS } from './locales.ts'
 import { bindSettingsScope, mergeSettings } from './settings.ts'
 import { applyVisual } from './visual.ts'
+import { createThemeOverrideController, getThemeService } from './theme.ts'
 import TYPERT_REMOTE from './remote.ts'
 import { setShiningRemote, type ShiningRemote } from './remote-types.ts'
 import { bindDshCtx } from './dsh-context.ts'
@@ -27,7 +28,7 @@ import { SettingsPanel } from './components/SettingsPanel.tsx'
 /** Required services。不注入 'remote.shining'（我们自己在 apply 里挂载，声明为依赖会死锁）。 */
 // 注意：`ctx.workspaces`/`ctx.sessions` 必须在此声明，否则 cordis 属性访问会抛
 // "cannot get property ... without inject"（runtime 在插件 apply 前已 provide 出这两个服务）。
-export const inject = ['slots', 'remote', 'locale', 'settingsScope', 'connection', 'workspaces', 'sessions']
+export const inject = ['slots', 'remote', 'locale', 'settingsScope', 'connection', 'workspaces', 'sessions', 'theme']
 
 /** Client plugin body。 */
 export async function apply(ctx: ClientContext): Promise<void> {
@@ -53,8 +54,17 @@ export async function apply(ctx: ClientContext): Promise<void> {
     decode: (section) => mergeSettings(section as Partial<ShiningSettings> | undefined),
   })
   bindSettingsScope(scope)
-  ctx.effect(() => scope.subscribe(() => applyVisual(scope.getSnapshot().value)), 'shining: visual subscription')
+  // 全套 GUI 换肤：按设置的主题色覆盖官方 --dsw token 层（light/dark 双档自适应）；
+  // 'follow' = 跟随 DSH，移除覆盖层还原原生观感。服务缺失时优雅跳过。
+  const themeCtl = createThemeOverrideController(getThemeService(ctx))
+  ctx.effect(() => scope.subscribe(() => {
+    const value = scope.getSnapshot().value
+    applyVisual(value)
+    themeCtl.apply(value?.visual.themeColor ?? 'galaxy-blue')
+  }), 'shining: visual subscription')
   applyVisual(scope.getSnapshot().value)
+  themeCtl.apply(scope.getSnapshot().value?.visual.themeColor ?? 'galaxy-blue')
+  ctx.effect(() => () => themeCtl.dispose(), 'shining: theme override teardown')
 
   // 工作区根路径与打开文件回调（订阅 workspaces 列表，按最近活跃工作区解析）。
   const syncRoot = () => {

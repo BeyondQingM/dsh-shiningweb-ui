@@ -1,7 +1,20 @@
 import { describe, it, expect } from 'vitest'
 import { ShiningSettingsSchema } from '../src/settings-schema.ts'
 import { DEFAULT_SHINING_SETTINGS } from '../src/settings.ts'
-import { bindSettingsScope, getSettingsDebugSnapshot } from '../src/client/settings.ts'
+import { bindSettingsScope, getSettingsDebugSnapshot, mergeSettings } from '../src/client/settings.ts'
+
+describe('follow-dsh theme option', () => {
+  it('host schema accepts visual.themeColor = follow', () => {
+    const parsed = ShiningSettingsSchema({ visual: { themeColor: 'follow' } })
+    expect(parsed.visual.themeColor).toBe('follow')
+  })
+
+  it('mergeSettings passes follow through and keeps galaxy-blue default', () => {
+    expect(mergeSettings({ visual: { themeColor: 'follow' } }).visual.themeColor).toBe('follow')
+    expect(mergeSettings(undefined).visual.themeColor).toBe('galaxy-blue')
+    expect(DEFAULT_SHINING_SETTINGS.visual.themeColor).toBe('galaxy-blue')
+  })
+})
 
 describe('settings diagnostics', () => {
   it('reports the live scope transport state without exposing values', () => {

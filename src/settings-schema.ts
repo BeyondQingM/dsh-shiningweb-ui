@@ -26,7 +26,7 @@ export const ShiningSettingsSchema = s.object({
     autoRefresh: s.union([s.const('off'), s.const('10s'), s.const('30s'), s.const('1m')]).default('off'),
   }).default({ enabled: true, autoRefresh: 'off' }),
   visual: s.object({
-    themeColor: s.union([s.const('galaxy-blue'), s.const('dawn-gold'), s.const('aurora-purple')]).default('galaxy-blue'),
+    themeColor: s.union([s.const('follow'), s.const('galaxy-blue'), s.const('dawn-gold'), s.const('aurora-purple')]).default('galaxy-blue'),
     glassBlur: s.number().min(0).max(24).default(12),
   }).default({ themeColor: 'galaxy-blue', glassBlur: 12 }),
   qq: s.object({

@@ -8,3 +8,33 @@
 .label { min-width: 90px; }
 .link { align-self: flex-start; background: transparent; border: 0; cursor: pointer; color: var(--shining-accent, var(--dsw-alias-state-warn-primary)); font: inherit; }
 .longTextarea { flex: 1; min-height: 72px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); resize: vertical; }
+
+/* 主题选择卡片网格 */
+.themeGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.themeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-base);
+  cursor: pointer;
+  color: var(--dsw-alias-label-primary);
+  text-align: left;
+  font: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.themeCard:hover { border-color: var(--card-primary); }
+.themeCard:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--card-primary); }
+.themeCardActive {
+  border-color: var(--card-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--card-primary) 35%, transparent);
+}
+.themeName { font-size: 13px; font-weight: 600; }
+.chips { display: flex; gap: 4px; }
+.chips i { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(128, 128, 128, 0.35); }
+.chipBg { background: var(--card-bg); }
+.chipPrimary { background: var(--card-primary); }
+.chipAccent { background: var(--card-accent); }
+.themeDesc { font-size: 11px; color: var(--dsw-alias-label-secondary); }

@@ -37,10 +37,10 @@ export declare const ShiningSettingsSchema: s<Schemastery.ObjectS<{
         autoRefresh: s<"off" | "10s" | "30s" | "1m", "off" | "10s" | "30s" | "1m">;
     }>>;
     visual: s<Schemastery.ObjectS<{
-        themeColor: s<"galaxy-blue" | "dawn-gold" | "aurora-purple", "galaxy-blue" | "dawn-gold" | "aurora-purple">;
+        themeColor: s<"follow" | "galaxy-blue" | "dawn-gold" | "aurora-purple", "follow" | "galaxy-blue" | "dawn-gold" | "aurora-purple">;
         glassBlur: s<number, number>;
     }>, Schemastery.ObjectT<{
-        themeColor: s<"galaxy-blue" | "dawn-gold" | "aurora-purple", "galaxy-blue" | "dawn-gold" | "aurora-purple">;
+        themeColor: s<"follow" | "galaxy-blue" | "dawn-gold" | "aurora-purple", "follow" | "galaxy-blue" | "dawn-gold" | "aurora-purple">;
         glassBlur: s<number, number>;
     }>>;
     qq: s<Schemastery.ObjectS<{
@@ -87,10 +87,10 @@ export declare const ShiningSettingsSchema: s<Schemastery.ObjectS<{
         autoRefresh: s<"off" | "10s" | "30s" | "1m", "off" | "10s" | "30s" | "1m">;
     }>>;
     visual: s<Schemastery.ObjectS<{
-        themeColor: s<"galaxy-blue" | "dawn-gold" | "aurora-purple", "galaxy-blue" | "dawn-gold" | "aurora-purple">;
+        themeColor: s<"follow" | "galaxy-blue" | "dawn-gold" | "aurora-purple", "follow" | "galaxy-blue" | "dawn-gold" | "aurora-purple">;
         glassBlur: s<number, number>;
     }>, Schemastery.ObjectT<{
-        themeColor: s<"galaxy-blue" | "dawn-gold" | "aurora-purple", "galaxy-blue" | "dawn-gold" | "aurora-purple">;
+        themeColor: s<"follow" | "galaxy-blue" | "dawn-gold" | "aurora-purple", "follow" | "galaxy-blue" | "dawn-gold" | "aurora-purple">;
         glassBlur: s<number, number>;
     }>>;
     qq: s<Schemastery.ObjectS<{

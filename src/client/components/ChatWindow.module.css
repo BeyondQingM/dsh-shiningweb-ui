@@ -26,6 +26,38 @@
   background-position: center;
   overflow: hidden;
 }
+/* 星野层：纯 CSS radial-gradient 星点 + 主题色辉光晕染；
+   位于壁纸之下、内容之上（内容均 position:relative 提升层级）。 */
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255, 255, 255, 0.9) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 34% 62%, rgba(255, 255, 255, 0.55) 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 12%, rgba(255, 255, 255, 0.7) 50%, transparent 51%),
+    radial-gradient(2px 2px at 76% 40%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 74%, rgba(255, 255, 255, 0.65) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 22% 84%, rgba(255, 255, 255, 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 46% 38%, rgba(255, 255, 255, 0.75) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 66% 88%, rgba(255, 255, 255, 0.45) 50%, transparent 51%),
+    radial-gradient(circle at 82% 10%, var(--shining-glow, transparent) 0%, transparent 42%),
+    radial-gradient(circle at 8% 92%, var(--shining-soft, transparent) 0%, transparent 38%);
+  opacity: 0.85;
+}
+/* 浅色模式下星点不可见，仅保留主题色晕染，避免脏点。 */
+:global(body:not([data-ds-dark-theme])) .panel::before {
+  opacity: 0.5;
+  background-image:
+    radial-gradient(circle at 82% 10%, var(--shining-glow, transparent) 0%, transparent 42%),
+    radial-gradient(circle at 8% 92%, var(--shining-soft, transparent) 0%, transparent 38%),
+    linear-gradient(160deg, var(--shining-soft, transparent), transparent 45%);
+}
+/* 用户设置壁纸时壁纸在 panel 背景层，星野叠在其上但极淡，不抢主体。 */
+.panel > * {
+  position: relative;
+}
 .header {
   display: flex;
   justify-content: space-between;

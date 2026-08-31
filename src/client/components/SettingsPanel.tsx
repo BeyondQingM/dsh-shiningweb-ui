@@ -8,6 +8,14 @@ import styles from './SettingsPanel.module.css'
 
 type Props = PropsRuntime<'settings.section'> & PropsLocale<'shining'>
 
+/** 主题选择卡片：色板芯片取各主题的代表色；follow 卡片芯片跟随 DSH 实时 token。 */
+const THEME_CARDS: Array<{ key: ShiningSettings['visual']['themeColor']; name: string; desc: string; bg: string; primary: string; accent: string }> = [
+  { key: 'follow', name: '跟随 DSH', desc: '还原 DSH 原生观感', bg: 'var(--dsw-alias-bg-base)', primary: 'var(--dsw-alias-brand-primary)', accent: 'var(--dsw-alias-interactive-bg-hover-accent)' },
+  { key: 'galaxy-blue', name: '星河蓝', desc: '深空蓝黑 · 蓝白星光', bg: '#0b1020', primary: '#4f7cff', accent: '#7aa0ff' },
+  { key: 'dawn-gold', name: '晨曦金', desc: '暖夜金棕 · 破晓晨光', bg: '#171106', primary: '#e0a43b', accent: '#f2c56b' },
+  { key: 'aurora-purple', name: '极光紫', desc: '紫夜 · 极光粉紫', bg: '#120b20', primary: '#9a6bff', accent: '#c39bff' },
+]
+
 export function SettingsPanel(_props: Props): React.ReactNode {
   const settings = useSettings()
   const patch = async <K extends keyof ShiningSettings>(key: K, value: ShiningSettings[K]) => {
@@ -64,12 +72,21 @@ export function SettingsPanel(_props: Props): React.ReactNode {
 
       <section className={styles.section}>
         <h4 className={styles.sub}>视觉主题</h4>
-        <label className={styles.row}>
-          <span>主色调</span>
-          <select value={settings.visual.themeColor} onChange={(e) => void patch('visual', { ...settings.visual, themeColor: e.target.value as ShiningSettings['visual']['themeColor'] })}>
-            <option value="galaxy-blue">星河蓝</option><option value="dawn-gold">晨曦金</option><option value="aurora-purple">极光紫</option>
-          </select>
-        </label>
+        <div className={styles.themeGrid}>
+          {THEME_CARDS.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              className={settings.visual.themeColor === t.key ? `${styles.themeCard} ${styles.themeCardActive}` : styles.themeCard}
+              style={{ '--card-bg': t.bg, '--card-primary': t.primary, '--card-accent': t.accent } as React.CSSProperties}
+              onClick={() => void patch('visual', { ...settings.visual, themeColor: t.key })}
+            >
+              <span className={styles.themeName}>{t.name}</span>
+              <span className={styles.chips}><i className={styles.chipBg} /><i className={styles.chipPrimary} /><i className={styles.chipAccent} /></span>
+              <span className={styles.themeDesc}>{t.desc}</span>
+            </button>
+          ))}
+        </div>
         <label className={styles.row}>
           <span>毛玻璃强度</span>
           <input type="range" min={0} max={24} value={settings.visual.glassBlur} onChange={(e) => void patch('visual', { ...settings.visual, glassBlur: Number(e.target.value) })} />
