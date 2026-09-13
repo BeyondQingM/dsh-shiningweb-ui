@@ -1,7 +1,28 @@
+import { type RemoteErrorDetailsMap } from '@deepseek-ai/dsh-typert-protocol';
+/**
+ * 本命名空间的 Remote 失败码词表。
+ *
+ * 0.1.5 起 Host 方法不再抛 `TypertLookupFailure`（已移除）：业务失败必须抛
+ * `RemoteError`，并把码声明进共享的 `RemoteErrorDetailsMap`。未声明的码会被网关
+ * 归并成 `gateway/internal`（客户端只能看到 "internal"，丢失业务码与文案）。
+ * 码统一用 `<namespace>/<slug>` 形态，与官方 domain 包（如 `session/not-found`）一致。
+ */
+declare module '@deepseek-ai/dsh-typert-protocol' {
+    interface RemoteErrorDetailsMap {
+        /** fs 操作失败（路径越界、IO 错误等）。 */
+        'shining/fs-error': {};
+        /** git 命令失败。 */
+        'shining/git-error': {};
+        /** 上游 LLM 调用失败。 */
+        'shining/chat-error': {};
+        /** QQ 会话层不可用或操作失败。 */
+        'shining/qq-error': {};
+    }
+}
 /** 成功：直接返回裸业务值（网关统一包成 { ok: true, value }）。 */
 export declare function success<T>(value: T): T;
 /** 失败：抛出携带业务错误码的失败（网关统一包成 { ok: false, error }）。 */
-export declare function failure(code: string, message: string): never;
+export declare function failure(code: keyof RemoteErrorDetailsMap, message: string): never;
 /** 将客户端路径解析为绝对路径，并强制位于 root 之内（防目录穿越）。 */
 export declare function resolveWithinRoot(root: string, path: string): string;
 export interface FsListRequest {

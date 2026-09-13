@@ -84,10 +84,12 @@ describe('ShiningService.chat', () => {
   it('throws the business failure (code + message preserved) on upstream error', async () => {
     const svc = makeService()
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: false, status: 401 } as never)
+    // 0.1.5：failure() 抛的是 RemoteError 本身（不再是带 failure 字段的 TypertLookupFailure）。
+    // 网关靠这个已声明的 shining/* 码把失败原样送到客户端；未声明的码会被归并成 gateway/internal。
     const err = await svc.chat({
       messages: [{ role: 'user', content: 'ping' }], model: 'm', apiBase: 'https://x', apiKey: 'k',
-    }).catch((e) => e as { failure?: { code: string; message: string } })
-    expect(err.failure).toMatchObject({ code: 'chat-error', message: 'upstream 401' })
+    }).catch((e) => e as { code?: string; message?: string })
+    expect(err).toMatchObject({ code: 'shining/chat-error', message: 'upstream 401' })
     fetchSpy.mockRestore()
   })
 })

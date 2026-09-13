@@ -68,8 +68,15 @@ function clientBuildEnvironmentDefines(environment: NodeJS.ProcessEnv): Record<s
   return defines
 }
 
-/** Wire/type layers a client bundle may inline. */
-export const INLINE_SAFE = /^@deepseek-ai\/dsh-(host-apiproxy|file-reference|session|llm|tools|brand)(\/|$)/
+/**
+ * Wire/type layers a client bundle may inline.
+ *
+ * `util-workspace-path` 是纯函数路径/地址工具（无文件系统访问），官方多个 client
+ * 包（ui-chat、ui-deliverables、ui-sidebar-files）同样直接内联它 —— 它给出
+ * `dsh-resource://file/...` 地址语法，正是右侧 Sidebar 的文件打开入口，属于
+ * 跨包共享的 wire 词汇而非插件间协作，因此允许内联。
+ */
+export const INLINE_SAFE = /^@deepseek-ai\/dsh-(host-apiproxy|file-reference|session|llm|tools|brand|util-workspace-path)(\/|$)/
 
 /** Vendored framework libraries. */
 const VENDORED_LIBRARY = /^@deepseek-ai\/(cosmokit|schemastery)(\/|$)/

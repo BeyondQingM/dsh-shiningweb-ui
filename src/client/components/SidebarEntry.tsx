@@ -1,7 +1,6 @@
 /** 侧边栏脚部入口：天圆地方 / 文件 按钮（sidebar.footer.action）。 */
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
-import type {} from '../slots.ts'
 import { useSettings } from '../settings.ts'
 import { openChat, openFiles } from '../store.ts'
 import { dict } from '../locales.ts'

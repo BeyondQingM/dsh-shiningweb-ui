@@ -2,6 +2,9 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, it, expect } from 'vitest'
 import { PLATFORM_MODULES, PRELOADED_CLIENT_EXTERNALS } from '../scripts/platform-modules.ts'
+// 静态导入：让 ESM 解析器真正解析制品（语法错误在此即失败）。
+import * as TYPERT_HOST_MODULE from '../lib/typert.host.js'
+import * as TYPERT_REMOTE_MODULE from '../lib/typert.remote-client.js'
 
 // 注意：不要用 import.meta.url + ../lib 定位（vitest 在含非 ASCII 路径下会把 import.meta.url 解析成
 // 项目根 URL，导致 ../lib 落到 F:\lib）。vitest 运行时 cwd 恒为项目根，用 process.cwd() 最稳。
@@ -48,5 +51,25 @@ describe('shipped typert.host.js is valid ESM JS', () => {
 
   it('declares the TYPERT export', () => {
     expect(TYPERT_HOST_JS).toContain('export const TYPERT =')
+  })
+})
+
+describe('every shipped host artifact is parseable plain JS', () => {
+  // 回归守卫：exports["./remote"] 的制品一度复用了带 `as const` 的 descriptor 源码，
+  // 于是 Node 导入时报 "SyntaxError: Unexpected identifier 'as'" —— 而 exports 目标
+  // 存在性检查抓不到它（文件确实存在，只是内容不是合法 JS）。
+  // 上面的静态 import 已经在加载期完成解析；这里再断言内容与导出形状。
+  it('no generated artifact leaks TypeScript syntax', () => {
+    for (const name of ['typert.host.js', 'typert.remote-client.js']) {
+      expect(readLib(name)).not.toMatch(/\bas const\b/)
+    }
+  })
+
+  it('typert.host.js exports the host manifest', () => {
+    expect(TYPERT_HOST_MODULE.TYPERT).toMatchObject({ package: 'dsh-shiningweb-ui', face: 'host' })
+  })
+
+  it('typert.remote-client.js exports the consumer descriptors', () => {
+    expect(TYPERT_REMOTE_MODULE.TYPERT_REMOTE).toMatchObject({ package: 'dsh-shiningweb-ui' })
   })
 })

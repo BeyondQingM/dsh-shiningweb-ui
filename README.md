@@ -2,7 +2,8 @@
 
 一个为 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 打造的 UI 增强插件：独立的 AI 人格空间「天圆地方」、类 VS Code 文件栏、Git 分支管理、QQ 群接入、记忆与朋友圈，以及一套会**真正改变界面观感**的视觉主题。所有模块可在设置面板独立开关。
 
-- 版本：`v0.1.0-rc4`
+- 版本：`v0.1.0-rc5`
+- 目标运行时：**DSH 0.1.5-rc**（`@deepseek-ai/dsh` ≥ 0.1.5-rc.1；插件依赖 `0.1.5-rc.2` 系列包与 `@deepseek-ai/cordis` ≥ 4.0.2）
 - 许可证：[MIT](LICENSE)
 
 ## ✨ 功能特性
@@ -77,15 +78,20 @@ dsh plugin --profile web add "file:/path/to/dsh-shiningweb-ui"
 仓库已提交构建产物 `lib/`（host ESM bundle + client bundle + typert 制品），安装后开箱即用。如需参与开发：
 
 ```sh
-npm install          # 安装开发依赖
-npm run verify       # typecheck + build + 全量测试（14 文件 / 58 用例）
+npm install          # 安装开发依赖（0.1.5-rc.2 契约；旧 rc 版本会让 typecheck 假绿）
+npm run verify       # typecheck + build + 全量测试
 npm run build        # 仅构建 lib/
 npm run gen:typert   # 重新生成客户端 remote 与 host typert 制品
 npm run install:profile  # 安装到默认 web profile（等价于 dsh plugin add）
 ```
 
+> **版本对齐很重要**：本插件的 `peerDependencies`/`devDependencies` 必须与目标 DSH 运行时同一 `0.1.5-rc.*` 系列。
+> 若两者错开（例如依赖停在 `0.1.0-rc.8`、运行时已是 `0.1.5-rc`），`npm run typecheck`/`test` 会针对旧契约**全部通过**，
+> 而插件在真实运行时才失败 —— 排查时请先比对 `node_modules/@deepseek-ai/dsh-*` 的实际版本与运行中的 `@deepseek-ai/dsh` 版本。
+> `tests/runtime-contract-015.spec.ts` 固化了与 0.1.5 契约绑定的硬事实，作为该类回归的守卫。
+
 - **host / client 分层**：`src/index.ts` 为 host 半入口（ShiningService 网关 + settings 注册 + 可选 QQ 会话层），`src/client/index.ts` 为 client 半入口（slot/settings/remote 挂载）。
-- **Remote 契约**：host 方法返回「裸业务值」，失败时抛出携带业务错误码的失败（由 Typert 网关统一包成 `{ ok, value }` / `{ ok: false, error }`），勿在插件里再包一层 `{ ok, value }`。
+- **Remote 契约**：host 方法返回「裸业务值」，失败时抛 `RemoteError`（业务码为 `shining/*`，在 `src/types.ts` 里合并进 `RemoteErrorDetailsMap`），由 Typert 网关统一包成 `{ ok, value }` / `{ ok: false, error }`，勿在插件里再包一层。
 - **视觉主题**：`src/client/visual.ts` 将主题色板写入 `--shining-*` CSS 变量，各组件在 `.module.css` 中消费。
 
 ## ⚠️ 注意事项

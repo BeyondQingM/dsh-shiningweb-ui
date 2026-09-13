@@ -7,9 +7,9 @@ import { dirname, join } from 'node:path'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { Context, Service } from '@deepseek-ai/cordis'
-import { settingsNamespace } from '@deepseek-ai/dsh-settings'
+import type { SettingsNamespace } from '@deepseek-ai/dsh-settings'
 import s from '@deepseek-ai/schemastery'
-import { Remote, TypertLookupFailure, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
+import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type {
   ChatRequest, ChatValue, FsEntry, FsListRequest, FsListValue, FsOpValue, FsPathRequest,
   FsReadRequest, FsReadValue, FsRenameRequest, FsWriteRequest, GitBranchRequest,
@@ -57,7 +57,8 @@ export class ShiningService extends TypertRemoteService {
     super(ctx, 'shining')
     ctx.inject(['settings'], (settingsCtx) => {
       try {
-        settingsCtx.settings.register(settingsNamespace(SETTINGS_NAMESPACE), ShiningSettingsSchema)
+        // 0.1.5：`settingsNamespace()` 工厂已移除，register 直接收裸命名空间字符串。
+        settingsCtx.settings.register(SETTINGS_NAMESPACE as SettingsNamespace, ShiningSettingsSchema)
       } catch (error) {
         console.error('[shining:host] settings namespace registration failed', {
           namespace: SETTINGS_NAMESPACE,
@@ -66,7 +67,7 @@ export class ShiningService extends TypertRemoteService {
         return
       }
       const readSettings = (): ShiningSettings =>
-        (settingsCtx.settings.get(settingsNamespace(SETTINGS_NAMESPACE)) as ShiningSettings | undefined) ?? DEFAULT_SHINING_SETTINGS
+        (settingsCtx.settings.get(SETTINGS_NAMESPACE as SettingsNamespace) as ShiningSettings | undefined) ?? DEFAULT_SHINING_SETTINGS
       void (async () => {
         const settings = readSettings()
         if (!settings.qq?.enabled || !settings.qq.appId || !settings.qq.appSecret) return
@@ -97,7 +98,7 @@ export class ShiningService extends TypertRemoteService {
       }
       return success({ entries: shown.sort((a, b) => Number(b.isDirectory) - Number(a.isDirectory) || a.name.localeCompare(b.name)) })
     } catch (error) {
-      return failure('fs-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/fs-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -107,7 +108,7 @@ export class ShiningService extends TypertRemoteService {
       const file = resolveWithinRoot(request.root, request.path)
       return success({ content: await fs.readFile(file, 'utf8') })
     } catch (error) {
-      return failure('fs-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/fs-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -118,7 +119,7 @@ export class ShiningService extends TypertRemoteService {
       await fs.writeFile(file, request.content, 'utf8')
       return success({ path: file })
     } catch (error) {
-      return failure('fs-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/fs-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -129,7 +130,7 @@ export class ShiningService extends TypertRemoteService {
       await fs.writeFile(file, '', { flag: 'wx' })
       return success({ path: file })
     } catch (error) {
-      return failure('fs-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/fs-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -140,7 +141,7 @@ export class ShiningService extends TypertRemoteService {
       await fs.mkdir(dir, { recursive: false })
       return success({ path: dir })
     } catch (error) {
-      return failure('fs-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/fs-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -152,7 +153,7 @@ export class ShiningService extends TypertRemoteService {
       await fs.rename(target, next)
       return success({ path: next })
     } catch (error) {
-      return failure('fs-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/fs-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -163,7 +164,7 @@ export class ShiningService extends TypertRemoteService {
       await fs.rm(target, { recursive: true, force: false })
       return success({ path: target })
     } catch (error) {
-      return failure('fs-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/fs-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -183,7 +184,7 @@ export class ShiningService extends TypertRemoteService {
       })
       return success({ branch, dirtyCount: lines.length, changes })
     } catch (error) {
-      return failure('git-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/git-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -193,7 +194,7 @@ export class ShiningService extends TypertRemoteService {
       const repo = resolveWithinRoot(request.root, request.repoPath)
       return success({ output: await gitResult(repo, ['checkout', request.branch]) })
     } catch (error) {
-      return failure('git-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/git-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -203,7 +204,7 @@ export class ShiningService extends TypertRemoteService {
       const repo = resolveWithinRoot(request.root, request.repoPath)
       return success({ output: await gitResult(repo, ['checkout', '-b', request.name]) })
     } catch (error) {
-      return failure('git-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/git-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -213,7 +214,7 @@ export class ShiningService extends TypertRemoteService {
       const repo = resolveWithinRoot(request.root, request.repoPath)
       return success({ output: await gitResult(repo, ['pull']) })
     } catch (error) {
-      return failure('git-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/git-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -226,12 +227,11 @@ export class ShiningService extends TypertRemoteService {
         body: JSON.stringify({ model: request.model, messages: request.messages, stream: false }),
         signal: AbortSignal.timeout(120000),
       })
-      if (!response.ok) return failure('chat-error', `upstream ${response.status}`)
+      if (!response.ok) return failure('shining/chat-error', `upstream ${response.status}`)
       const data = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> }
       return success({ content: data.choices?.[0]?.message?.content ?? '' })
     } catch (error) {
-      if (error instanceof TypertLookupFailure) throw error
-      return failure('chat-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/chat-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -242,7 +242,7 @@ export class ShiningService extends TypertRemoteService {
       const sessions: QqSessionView[] = (svc?.list() ?? []).map((s) => ({ key: s.key, peerId: s.peerId, kind: s.kind, messages: s.messages, updatedAt: s.updatedAt }))
       return success({ sessions })
     } catch (error) {
-      return failure('qq-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/qq-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -253,7 +253,7 @@ export class ShiningService extends TypertRemoteService {
       const s = svc?.read(request.key)
       return success({ session: s ? { key: s.key, peerId: s.peerId, kind: s.kind, messages: s.messages, updatedAt: s.updatedAt } : undefined })
     } catch (error) {
-      return failure('qq-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/qq-error', error instanceof Error ? error.message : String(error))
     }
   }
 
@@ -261,12 +261,11 @@ export class ShiningService extends TypertRemoteService {
   async qqSend(request: QqSendRequest): Promise<QqSendValue> {
     try {
       const svc = this.ctx.shiningQq
-      if (!svc) return failure('qq-error', 'qq service not enabled')
+      if (!svc) throw new Error('qq service not enabled')
       await svc.sendTo(request.key, request.content)
       return success({ ok: true })
     } catch (error) {
-      if (error instanceof TypertLookupFailure) throw error
-      return failure('qq-error', error instanceof Error ? error.message : String(error))
+      return failure('shining/qq-error', error instanceof Error ? error.message : String(error))
     }
   }
 }

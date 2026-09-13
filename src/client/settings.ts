@@ -1,6 +1,6 @@
 /** useSettings hook：订阅 settingsScope 快照，合并默认值。 */
 import { useSyncExternalStore } from 'react'
-import type { SettingsScope } from '@deepseek-ai/dsh-client-runtime/client'
+import type { SettingsScope } from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { ShiningSettings } from '../settings.ts'
 import { DEFAULT_SHINING_SETTINGS } from '../settings.ts'
 

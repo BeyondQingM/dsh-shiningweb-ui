@@ -51,3 +51,42 @@ describe('client settings scope publishes a value (decode regression)', () => {
     expect(code).toContain('decode: (section) => mergeSettings(section')
   })
 })
+
+describe('manifest matches the services the client half consumes', () => {
+  const pkg = JSON.parse(readFileSync(resolve(process.cwd(), 'package.json'), 'utf8')) as {
+    dsh: { client: { platform: string, inject: string[] } }
+    peerDependencies: Record<string, string>
+  }
+
+  // dsh.client.inject 是 boot 图里的**包边**：模块表必须先物化这些包，我们的 fiber 才可能拿到
+  // 它们提供的服务。0.1.5 把 client 服务拆到了多个包（ui-renderer 提供 ctx.slots、
+  // api-*-controller 提供 ctx.workspaces/sessions、ui-sidebar-right 提供 ctx.sidebarRight），
+  // 漏掉任何一条边，对应服务在 apply 时就不是"已就绪"。
+  it('declares a web platform and the expected package edges', () => {
+    expect(pkg.dsh.client.platform).toBe('web')
+    for (const edge of [
+      '@deepseek-ai/dsh-client-ui-renderer',
+      '@deepseek-ai/dsh-client-ui-sidebar-right',
+      '@deepseek-ai/dsh-api-session-controller',
+      '@deepseek-ai/dsh-api-workspace-controller',
+      '@deepseek-ai/dsh-client-ui-settings',
+      '@deepseek-ai/dsh-api-remotes',
+      '@deepseek-ai/dsh-client-locale',
+      '@deepseek-ai/dsh-client-ui-layout',
+      '@deepseek-ai/dsh-client-ui-conversation',
+      '@deepseek-ai/dsh-client-ui-sidebar',
+    ]) {
+      expect(pkg.dsh.client.inject).toContain(edge)
+    }
+  })
+
+  it('every declared client edge is also a declared peer dependency', () => {
+    const missing = pkg.dsh.client.inject.filter((name) => !(name in pkg.peerDependencies))
+    expect(missing).toEqual([])
+  })
+
+  it('does not hand-roll a second runtime package (dsh-client-runtime was discontinued)', () => {
+    expect(Object.keys(pkg.peerDependencies)).not.toContain('@deepseek-ai/dsh-client-runtime')
+    expect(codeOf('client/index.ts')).not.toContain('dsh-client-runtime')
+  })
+})

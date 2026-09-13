@@ -3,7 +3,14 @@
  * 纯客户端能力（读 ctx.workspaces/ctx.sessions + session.prompt 代发）。
  */
 import { useSyncExternalStore } from 'react'
-import type { ClientContext, SessionId, WorkspaceId } from '@deepseek-ai/dsh-client-runtime/client'
+import type { Context as ClientContext } from '@deepseek-ai/cordis'
+// 0.1.5：`@deepseek-ai/dsh-client-runtime` 已停止发布。各 ctx 服务的类型由
+//「声明它们的包」通过 declare module '@deepseek-ai/cordis' 合并，因此这些
+// type-only 导入既是类型来源，也是把合并拉进当前程序的手段（运行时被擦除）。
+import type {} from '@deepseek-ai/dsh-api-session-controller/client'
+import type {} from '@deepseek-ai/dsh-api-workspace-controller/client'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
 
 let ctx: ClientContext | undefined
 const listeners = new Set<() => void>()

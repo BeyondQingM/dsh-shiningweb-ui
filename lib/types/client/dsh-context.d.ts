@@ -1,4 +1,6 @@
-import type { ClientContext, SessionId, WorkspaceId } from '@deepseek-ai/dsh-client-runtime/client';
+import type { Context as ClientContext } from '@deepseek-ai/cordis';
+import type { SessionId } from '@deepseek-ai/dsh-session/types';
+import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types';
 /** apply 时绑定 DSH 客户端上下文。 */
 export declare function bindDshCtx(c: ClientContext): void;
 export interface DshWorkspace {

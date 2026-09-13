@@ -2,13 +2,22 @@
  * dsh-shiningweb-ui 插件 client 半入口。
  * apply：注册字典、挂载 shinining Remote、绑定 settingsScope、应用视觉。
  */
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+// 0.1.5：`@deepseek-ai/dsh-client-runtime` 已停止发布（最后版本 0.1.1-rc.2），
+// 其 client 上下文类型并入 cordis 自身 —— 官方 client 包统一 `import type { Context as ClientContext } from '@deepseek-ai/cordis'`。
+import type { Context as ClientContext } from '@deepseek-ai/cordis'
 // Type-only：拉入各包的 Context/SlotMap merge（client bundle purity gate 会擦除）。
+// 0.1.5：`ctx.slots` 由 dsh-client-ui-renderer 声明，`ctx.workspaces`/`ctx.sessions`
+// 分别由 api-workspace-controller / api-session-controller 声明，`ctx.sidebarRight`
+// 由 ui-sidebar-right 声明 —— 缺哪个 import，对应的 ctx 属性在类型上就不存在。
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
+import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
+import type { ISidebarRight } from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
+import type {} from '@deepseek-ai/dsh-api-workspace-controller/client'
+import type {} from '@deepseek-ai/dsh-api-session-controller/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import type {} from './slots.ts'
 import type { ShiningSettings } from '../settings.ts'
 import { SETTINGS_NAMESPACE } from '../settings.ts'
 import { dict, NS } from './locales.ts'
@@ -17,8 +26,9 @@ import { applyVisual } from './visual.ts'
 import { createThemeOverrideController, getThemeService } from './theme.ts'
 import TYPERT_REMOTE from './remote.ts'
 import { setShiningRemote, type ShiningRemote } from './remote-types.ts'
-import { bindDshCtx } from './dsh-context.ts'
-import { resolveCurrentWorkspaceRoot, setWorkspaceRoot, setOpenPath } from './workspace.ts'
+import { bindDshCtx, getCurrentSessionId } from './dsh-context.ts'
+import { resolveCurrentWorkspaceRoot, setWorkspaceRoot, setOpenPath, getWorkspaceRoot } from './workspace.ts'
+import { fileAddressFor } from '@deepseek-ai/dsh-util-workspace-path'
 import { ChatEntry, FilesEntry } from './components/SidebarEntry.tsx'
 import { ChatWindow } from './components/ChatWindow.tsx'
 import { FileExplorer } from './components/FileExplorer.tsx'
@@ -27,8 +37,12 @@ import { SettingsPanel } from './components/SettingsPanel.tsx'
 
 /** Required services。不注入 'remote.shining'（我们自己在 apply 里挂载，声明为依赖会死锁）。 */
 // 注意：`ctx.workspaces`/`ctx.sessions` 必须在此声明，否则 cordis 属性访问会抛
-// "cannot get property ... without inject"（runtime 在插件 apply 前已 provide 出这两个服务）。
-export const inject = ['slots', 'remote', 'locale', 'settingsScope', 'connection', 'workspaces', 'sessions', 'theme']
+// "cannot get property ... without inject"（runtime 在插件 apply 前已 provide 出这些服务）。
+// `sidebarRight` 是唯一**故意不声明**的：见下方 setOpenPath 的 ctx.get 用法。
+export const inject = [
+  'slots', 'remote', 'locale', 'settingsScope', 'connection',
+  'workspaces', 'sessions', 'theme',
+]
 
 /** Client plugin body。 */
 export async function apply(ctx: ClientContext): Promise<void> {
@@ -73,7 +87,18 @@ export async function apply(ctx: ClientContext): Promise<void> {
   }
   syncRoot()
   ctx.effect(() => ctx.workspaces.list.subscribe(syncRoot), 'shining: workspace root')
-  setOpenPath((path) => void ctx.workspaces.openPath(path))
+  // 0.1.5：`ctx.workspaces.openPath` 已移除（打开文件不再是 workspaces 服务的职责）。
+  // 现行标准是资源地址 + 右侧 Sidebar —— 文件资源地址为
+  // `dsh-resource://file/session/<sessionId>/<path>`；由 sidebarRight 认领并开 tab。
+  // 这里用 ctx.get 读成**可选**服务：只有"用官方 UI 打开文件"这一个动作依赖它，
+  // 不值得为它让整个插件变成硬依赖（组合里没有 sidebarRight 时，其余功能照常可用）。
+  setOpenPath((path) => {
+    const sessionId = getCurrentSessionId()
+    if (sessionId === undefined) return
+    const opener = ctx.get('sidebarRight') as ISidebarRight | undefined
+    if (opener === undefined) return
+    opener.openResource(fileAddressFor(sessionId, getWorkspaceRoot(), path))
+  })
 
   // 侧边栏脚部入口：天圆地方 / 文件。
   ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({ name: 'sidebar.footer.action', id: 'shining-chat', order: 30, locale: NS }, ChatEntry))

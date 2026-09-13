@@ -8,7 +8,7 @@ import type { ShiningSettings } from './settings.ts';
 /** 设置 schema：wire 校验与默认值。 */
 export declare const ShiningSettingsSchema: s<Schemastery.ObjectS<{
     enabled: s<boolean, boolean>;
-    capabilityMode: s<"pet" | "assistant" | "super", "pet" | "assistant" | "super">;
+    capabilityMode: s<"assistant" | "pet" | "super", "assistant" | "pet" | "super">;
     chat: s<Schemastery.ObjectS<{
         enabled: s<boolean, boolean>;
         personaId: s<string, string>;
@@ -58,7 +58,7 @@ export declare const ShiningSettingsSchema: s<Schemastery.ObjectS<{
     }>>;
 }>, Schemastery.ObjectT<{
     enabled: s<boolean, boolean>;
-    capabilityMode: s<"pet" | "assistant" | "super", "pet" | "assistant" | "super">;
+    capabilityMode: s<"assistant" | "pet" | "super", "assistant" | "pet" | "super">;
     chat: s<Schemastery.ObjectS<{
         enabled: s<boolean, boolean>;
         personaId: s<string, string>;
