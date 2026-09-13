@@ -42,9 +42,17 @@
 # 从 GitHub 安装（推荐，仓库已包含构建产物 lib/）
 dsh plugin --profile web add "github:BeyondQingM/dsh-shiningweb-ui"
 
-# 或使用本地路径（插件源码目录）
-dsh plugin --profile web add "file:/path/to/dsh-shiningweb-ui"
+# 或从本地源码目录安装
+npm run install:profile        # 推荐：脚本会处理路径含空格的坑（见下）
 ```
+
+> **⚠️ 路径含空格时不要直接执行 `dsh plugin add <目录>`。** 该命令会**按空格拆参数**，
+> 例如 `F:\Coding Projects\...\dsh-shiningweb-ui` 会被拆成 `Coding` / `Other` /
+> `dsh-shiningweb-ui` 三个依赖写进 profile，前两个指向不存在的目录。
+> 同理不要用 `dsh plugin add "file:<目录>"` —— `file:` specifier 无法转义空格，
+> pnpm 会截断成 `F:/Coding` 并报 `ERR_PNPM_LINKED_PKG_DIR_NOT_FOUND`。
+> 请改用 `npm run install:profile`：它会在 `%LOCALAPPDATA%\dsh-plugin-install-links\`
+> 下建一个无空格的目录链接再安装。
 
 安装完成后，**重启 `dsh web`** 使插件生效（重启会中断当前会话）。
 

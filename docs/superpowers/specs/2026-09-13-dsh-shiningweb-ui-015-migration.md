@@ -143,22 +143,55 @@
 
 ## 6. 生效方式
 
-插件目前**没有**安装到 `web` profile（本次修复只装在临时环境验证，未触碰正在运行的实例）。
-需要生效时：
+本插件已安装到 `web` profile（`D:\DSH_Data\profiles\web`），需要**重启 `dsh web`** 才会挂载
+（会中断当前会话）。重装/换机时：
 
 ```sh
 cd <插件目录>
-npm run install:profile        # 等价于 dsh plugin --profile web add <插件目录>
+npm run install:profile        # 等价于 dsh plugin --profile web add <无空格路径>
 ```
 
-然后**重启 `dsh web`**（会中断当前会话）。若 profile 依赖曾指向旧版本，建议连同 profile 目录的
-`node_modules` 一起重装，避免残留 0.1.0-rc.8 的包。
+### 6.1 路径含空格是这条路线上最大的坑（本次实际踩到）
 
-自检（重启前就能做）：
+`dsh plugin add <dir>` 在 Windows 上**按空格拆参数**。把
+`F:\Coding Projects\Other Projects\dsh-shiningweb-ui` 直接传进去，会被拆成三个依赖：
+
+```jsonc
+// profile/package.json —— 被写坏的形态
+"Coding": "link:F:/Coding",                       // 指向不存在的目录
+"Other": "link:Projects\\Other",                  // 指向不存在的目录
+"dsh-shiningweb-ui": "link:Projects\\dsh-shiningweb-ui"
+```
+
+`dsh` 随后会为前两个打印 "declares no dsh.bundle" 警告（因为它们根本不是包）。
+此外 `file:<dir>` 形式同样不行：`file:` specifier 无法转义空格，pnpm 会截断成 `F:/Coding`
+并报 `ERR_PNPM_LINKED_PKG_DIR_NOT_FOUND`。
+
+**`scripts/install.mjs` 已内建绕行**：路径含空格时，先在一个**自身无空格**的目录
+（`%LOCALAPPDATA%\dsh-plugin-install-links\<包名>`）建立目录链接，再把该链接路径交给 dsh CLI。
+链接会被复用（目标一致时不重建），不会留下 `-2`、`-3` 一串残留。
+
+另外两个与脚本执行相关的坑（都已处理）：
+
+- Windows 上 `dsh` 是 npm 生成的 `.ps1`/`.cmd`，`execFileSync('dsh', …)` 不认 `.ps1`；
+  而 Node ≥ 18.20/20.12 的安全修复后**拒绝**直接 spawn `.cmd`/`.bat`（抛 `EINVAL`）。
+  因此脚本先用 `where dsh.cmd` 定位，再以 `cmd /c <cmd> <args…>`、参数走数组的方式执行。
+- 不要用 `shell: true` 传参数：会触发 Node 的 DEP0190，并把参数拼接进命令行 ——
+  含空格路径会再次被拆开。
+
+### 6.2 若曾用错误方式装过，如何复原
+
+profile 的 `package.json` 只是普通 JSON，手动删掉 `Coding` / `Other` 两个依赖即可；
+再清掉 `profiles/<name>/node_modules/` 下同名的两个 junction（它们指向不存在的目录），
+然后按 §6.1 重新安装。
+
+### 6.3 自检（重启前就能做）
 
 ```sh
-dsh plugin --profile web add <插件目录>
 dsh --profile web --dump-config | Select-String "shiningweb-ui"   # 应出现 # == dsh-shiningweb-ui
+
+# profile 根目录下，确认每个 bundle 都能解析
+node -e "const r=require('node:module').createRequire(process.cwd()+'/package.json'); for (const n of ['@deepseek-ai/dsh-base','@deepseek-ai/dsh-web-app','dsh-context-doctor','@liustack/modlens','@modusensus/dsh-mneme','superpowers-dsh','dsh-shiningweb-ui']) { try { r.resolve(n+'/package.json'); console.log('OK   '+n) } catch { console.log('FAIL '+n) } }"
 ```
 
 ---
